@@ -82,8 +82,11 @@ export interface Deuda {
 }
 
 export interface Ahorro {
-  ahorro_mensual_liquido: number;
+  ahorro_mensual_corto_plazo: number;
+  ahorro_mensual_mediano_plazo: number;
   ahorro_mensual_largo_plazo: number;
+  ahorro_mensual_fondos_mutuos: number;
+  ahorro_mensual_etf: number;
   ahorro_mensual_cripto: number;
   ahorro_mensual_total: number;
   fondo_emergencia_actual: number;

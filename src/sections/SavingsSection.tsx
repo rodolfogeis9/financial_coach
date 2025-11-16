@@ -1,40 +1,64 @@
 import { Card } from '../components/common/Card';
 import { NumericInput } from '../components/common/NumericInput';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
+import { ProgressSummary } from '../components/common/ProgressSummary';
 
 export const SavingsSection = () => {
   const { perfil, updateAhorro } = useFinancialProfile();
   const { ahorro, ingreso } = perfil;
 
   const ahorroMensualTotal = ahorro.ahorro_mensual_total;
-  const porcentaje = ingreso.ingreso_total ? (ahorroMensualTotal / ingreso.ingreso_total) * 100 : 0;
+  const summaryDetails = [
+    { label: 'Corto plazo', value: `$${ahorro.ahorro_mensual_corto_plazo.toLocaleString('es-CL')}` },
+    { label: 'Mediano plazo', value: `$${ahorro.ahorro_mensual_mediano_plazo.toLocaleString('es-CL')}` },
+    { label: 'Largo plazo', value: `$${ahorro.ahorro_mensual_largo_plazo.toLocaleString('es-CL')}` },
+    { label: 'Fondos mutuos', value: `$${ahorro.ahorro_mensual_fondos_mutuos.toLocaleString('es-CL')}` },
+    { label: 'ETF', value: `$${ahorro.ahorro_mensual_etf.toLocaleString('es-CL')}` },
+    { label: 'Cripto', value: `$${ahorro.ahorro_mensual_cripto.toLocaleString('es-CL')}` }
+  ];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-6">
-        <Card title="Ahorro líquido">
-          <p className="text-sm text-slate-500">Incluye cuenta corriente/vista, depósitos a plazo y fondos mutuos de corto plazo.</p>
-          <NumericInput
-            label="Aporte mensual líquido"
-            value={ahorro.ahorro_mensual_liquido || ''}
-            onChange={(e) => updateAhorro({ ahorro_mensual_liquido: Number(e.target.value) || 0 })}
-          />
+        <Card title="Ahorro mensual por horizonte">
+          <p className="text-sm text-slate-500">Todo lo que apartas cada mes en cada plazo.</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <NumericInput
+              label="Corto plazo"
+              value={ahorro.ahorro_mensual_corto_plazo || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_corto_plazo: Number(e.target.value) || 0 })}
+            />
+            <NumericInput
+              label="Mediano plazo"
+              value={ahorro.ahorro_mensual_mediano_plazo || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_mediano_plazo: Number(e.target.value) || 0 })}
+            />
+            <NumericInput
+              label="Largo plazo"
+              value={ahorro.ahorro_mensual_largo_plazo || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_largo_plazo: Number(e.target.value) || 0 })}
+            />
+          </div>
         </Card>
-        <Card title="Ahorro largo plazo e inversiones">
-          <p className="text-sm text-slate-500">Fondos mutuos largos, acciones, APV y otros vehículos.
-          </p>
-          <NumericInput
-            label="Aporte mensual a largo plazo"
-            value={ahorro.ahorro_mensual_largo_plazo || ''}
-            onChange={(e) => updateAhorro({ ahorro_mensual_largo_plazo: Number(e.target.value) || 0 })}
-          />
-        </Card>
-        <Card title="Criptomonedas">
-          <NumericInput
-            label="Aporte mensual en cripto"
-            value={ahorro.ahorro_mensual_cripto || ''}
-            onChange={(e) => updateAhorro({ ahorro_mensual_cripto: Number(e.target.value) || 0 })}
-          />
+        <Card title="Vehículos de inversión (mensual)">
+          <p className="text-sm text-slate-500">Detalla cuánto destinas cada mes en instrumentos específicos.</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <NumericInput
+              label="Fondos mutuos"
+              value={ahorro.ahorro_mensual_fondos_mutuos || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_fondos_mutuos: Number(e.target.value) || 0 })}
+            />
+            <NumericInput
+              label="ETF"
+              value={ahorro.ahorro_mensual_etf || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_etf: Number(e.target.value) || 0 })}
+            />
+            <NumericInput
+              label="Criptomonedas"
+              value={ahorro.ahorro_mensual_cripto || ''}
+              onChange={(e) => updateAhorro({ ahorro_mensual_cripto: Number(e.target.value) || 0 })}
+            />
+          </div>
         </Card>
         <Card title="Stock actual">
           <div className="grid gap-4 md:grid-cols-2">
@@ -51,11 +75,13 @@ export const SavingsSection = () => {
           </div>
         </Card>
       </div>
-      <Card title="Resumen de ahorro" className="h-fit">
-        <p className="text-sm text-slate-500">Ahorro mensual total</p>
-        <p className="text-4xl font-bold text-slate-900">${ahorroMensualTotal.toLocaleString('es-CL')}</p>
-        <p className="text-sm text-slate-500">{porcentaje.toFixed(1)} % del ingreso</p>
-      </Card>
+      <ProgressSummary
+        title="Ahorro e inversión mensual"
+        amount={ahorroMensualTotal}
+        income={ingreso.ingreso_total}
+        description="El objetivo recomendado es destinar al menos 20 % de tu ingreso al ahorro."
+        details={summaryDetails}
+      />
     </div>
   );
 };

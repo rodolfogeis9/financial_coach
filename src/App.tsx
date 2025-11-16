@@ -30,7 +30,7 @@ export default function App() {
   const { perfil } = useFinancialProfile();
   const [currentSection, setCurrentSection] = useState<SeccionClave>('inicio');
   const totales = useMemo(() => calcularTotales(perfil), [perfil]);
-  const canViewResults = perfil.ingreso.ingreso_total > 0 && totales.valido;
+  const hasIncome = perfil.ingreso.ingreso_total > 0;
 
   const completion = useMemo(() => ({
     inicio: true,
@@ -40,9 +40,9 @@ export default function App() {
     deudas: perfil.deudas.lista_deudas.some((d) => d.cuota_mensual > 0),
     ahorro: perfil.ahorro.ahorro_mensual_total > 0,
     metas: perfil.metas.lista_metas.length > 0,
-    resultado: canViewResults,
-    simulador: canViewResults
-  }), [perfil, canViewResults]);
+    resultado: hasIncome && totales.valido,
+    simulador: hasIncome
+  }), [perfil, hasIncome, totales.valido]);
 
   const sectionsOrder: SeccionClave[] = [
     'inicio',
@@ -82,7 +82,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100">
       <Header />
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row">
         <Sidebar
@@ -90,17 +90,17 @@ export default function App() {
             key,
             label: sectionLabels[key],
             complete: completion[key],
-            disabled: key === 'resultado' ? !canViewResults : key === 'simulador' ? !canViewResults : false
+            disabled: key === 'resultado' ? !hasIncome : key === 'simulador' ? !hasIncome : false
           }))}
           current={currentSection}
           onSelect={(key) => {
-            if ((key === 'resultado' || key === 'simulador') && !canViewResults) return;
+            if ((key === 'resultado' || key === 'simulador') && !hasIncome) return;
             setCurrentSection(key);
           }}
         />
         <main className="flex-1 space-y-6">{renderSection()}</main>
       </div>
-      {!canViewResults && currentSection === 'resultado' && (
+      {hasIncome && !totales.valido && currentSection === 'resultado' && (
         <div className="mx-auto max-w-4xl px-4 pb-10">
           <p className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm text-red-600">
             Para ver tu resultado necesitas ingresar tu ingreso mensual total y asignar el 100 % entre gastos y ahorro
