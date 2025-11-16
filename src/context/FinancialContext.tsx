@@ -121,8 +121,11 @@ const defaultProfile: PerfilFinanciero = {
     ]
   },
   ahorro: {
-    ahorro_mensual_liquido: 0,
+    ahorro_mensual_corto_plazo: 0,
+    ahorro_mensual_mediano_plazo: 0,
     ahorro_mensual_largo_plazo: 0,
+    ahorro_mensual_fondos_mutuos: 0,
+    ahorro_mensual_etf: 0,
     ahorro_mensual_cripto: 0,
     ahorro_mensual_total: 0,
     fondo_emergencia_actual: 0,
@@ -170,8 +173,11 @@ const recalcAhorro = (ahorro: PerfilFinanciero['ahorro']) => ({
   ...ahorro,
   ahorro_mensual_total: Math.max(
     0,
-    Number(ahorro.ahorro_mensual_liquido) +
+    Number(ahorro.ahorro_mensual_corto_plazo) +
+      Number(ahorro.ahorro_mensual_mediano_plazo) +
       Number(ahorro.ahorro_mensual_largo_plazo) +
+      Number(ahorro.ahorro_mensual_fondos_mutuos) +
+      Number(ahorro.ahorro_mensual_etf) +
       Number(ahorro.ahorro_mensual_cripto)
   )
 });

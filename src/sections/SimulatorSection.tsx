@@ -25,12 +25,20 @@ const applyDelta = (perfil: PerfilFinanciero, deltaEV: number, deltaAI: number, 
 
   const ahorroAjustado = {
     ...perfil.ahorro,
-    ahorro_mensual_liquido: clamp(perfil.ahorro.ahorro_mensual_liquido * factorAI),
+    ahorro_mensual_corto_plazo: clamp(perfil.ahorro.ahorro_mensual_corto_plazo * factorAI),
+    ahorro_mensual_mediano_plazo: clamp(perfil.ahorro.ahorro_mensual_mediano_plazo * factorAI),
     ahorro_mensual_largo_plazo: clamp(perfil.ahorro.ahorro_mensual_largo_plazo * factorAI),
+    ahorro_mensual_fondos_mutuos: clamp(perfil.ahorro.ahorro_mensual_fondos_mutuos * factorAI),
+    ahorro_mensual_etf: clamp(perfil.ahorro.ahorro_mensual_etf * factorAI),
     ahorro_mensual_cripto: clamp(perfil.ahorro.ahorro_mensual_cripto * factorAI)
   };
   ahorroAjustado.ahorro_mensual_total =
-    ahorroAjustado.ahorro_mensual_liquido + ahorroAjustado.ahorro_mensual_largo_plazo + ahorroAjustado.ahorro_mensual_cripto;
+    ahorroAjustado.ahorro_mensual_corto_plazo +
+    ahorroAjustado.ahorro_mensual_mediano_plazo +
+    ahorroAjustado.ahorro_mensual_largo_plazo +
+    ahorroAjustado.ahorro_mensual_fondos_mutuos +
+    ahorroAjustado.ahorro_mensual_etf +
+    ahorroAjustado.ahorro_mensual_cripto;
 
   return {
     ...perfil,

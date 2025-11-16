@@ -3,6 +3,7 @@ import { Card } from '../components/common/Card';
 import { NumericInput } from '../components/common/NumericInput';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { Deuda, TipoAgrupador, TipoDeuda } from '../types/financial';
+import { ProgressSummary } from '../components/common/ProgressSummary';
 
 const deudaLabels: Record<TipoDeuda, string> = {
   [TipoDeuda.CONSUMO]: 'Consumo',
@@ -12,7 +13,7 @@ const deudaLabels: Record<TipoDeuda, string> = {
   [TipoDeuda.OTRA]: 'Otra'
 };
 
-const agrupadorPorDeuda: Record<TipoDeuda, TipoAgrupador> = {
+const agrupadorPorDeuda: Record<TipoDeuda, TipoAgrupador.DM | TipoAgrupador.DB> = {
   [TipoDeuda.CONSUMO]: TipoAgrupador.DM,
   [TipoDeuda.AUTO]: TipoAgrupador.DM,
   [TipoDeuda.HIPOTECA]: TipoAgrupador.DB,
@@ -22,7 +23,7 @@ const agrupadorPorDeuda: Record<TipoDeuda, TipoAgrupador> = {
 
 export const DebtSection = () => {
   const { perfil, upsertDeuda, removeDeuda } = useFinancialProfile();
-  const { deudas } = perfil;
+  const { deudas, ingreso } = perfil;
 
   const addDeuda = (tipo: TipoDeuda) => {
     const nueva: Deuda = {
@@ -38,9 +39,18 @@ export const DebtSection = () => {
   const totalPorTipo = (tipo: TipoAgrupador) =>
     deudas.lista_deudas.filter((d) => d.tipo_agrupador === tipo).reduce((sum, deuda) => sum + (deuda.cuota_mensual || 0), 0);
 
+  const totalConsumo = totalPorTipo(TipoAgrupador.DM);
+  const totalBuena = totalPorTipo(TipoAgrupador.DB);
+  const totalDeuda = totalConsumo + totalBuena;
+  const summaryDetails = [
+    { label: 'Consumo (DM)', value: `$${totalConsumo.toLocaleString('es-CL')}` },
+    { label: 'Deuda buena (DB)', value: `$${totalBuena.toLocaleString('es-CL')}` }
+  ];
+
   return (
-    <div className="space-y-6">
-      <Card title="Detalle de deudas">
+    <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+      <div className="space-y-6">
+        <Card title="Detalle de deudas">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="text-xs uppercase tracking-wider text-slate-500">
@@ -114,15 +124,23 @@ export const DebtSection = () => {
             </button>
           ))}
         </div>
-      </Card>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card title="Total deuda de consumo">
-          <p className="text-3xl font-bold text-slate-900">${totalPorTipo(TipoAgrupador.DM).toLocaleString('es-CL')}</p>
         </Card>
-        <Card title="Total deuda buena">
-          <p className="text-3xl font-bold text-slate-900">${totalPorTipo(TipoAgrupador.DB).toLocaleString('es-CL')}</p>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card title="Total deuda de consumo">
+            <p className="text-3xl font-bold text-slate-900">${totalConsumo.toLocaleString('es-CL')}</p>
+          </Card>
+          <Card title="Total deuda buena">
+            <p className="text-3xl font-bold text-slate-900">${totalBuena.toLocaleString('es-CL')}</p>
+          </Card>
+        </div>
       </div>
+      <ProgressSummary
+        title="Cuotas mensuales vs. ingreso"
+        amount={totalDeuda}
+        income={ingreso.ingreso_total}
+        description="Incluye todas tus cuotas de consumo, auto, tarjetas e hipotecas."
+        details={summaryDetails}
+      />
     </div>
   );
 };

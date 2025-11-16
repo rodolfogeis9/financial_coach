@@ -2,6 +2,7 @@ import { Card } from '../components/common/Card';
 import { NumericInput } from '../components/common/NumericInput';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { Gasto } from '../types/financial';
+import { ProgressSummary } from '../components/common/ProgressSummary';
 
 interface FixedBlock {
   title: string;
@@ -34,7 +35,10 @@ export const FixedExpensesSection = () => {
     }, 0);
 
   const totalFijos = blocks.reduce((sum, block) => sum + blockSubtotal(block.items), 0);
-  const porcentaje = ingreso.ingreso_total ? (totalFijos / ingreso.ingreso_total) * 100 : 0;
+  const summaryDetails = blocks.map((block) => ({
+    label: block.title,
+    value: `$${blockSubtotal(block.items).toLocaleString('es-CL')}`
+  }));
 
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -60,11 +64,13 @@ export const FixedExpensesSection = () => {
           </Card>
         ))}
       </div>
-      <Card title="Resumen" className="h-fit">
-        <p className="text-sm text-slate-500">Total gastos fijos</p>
-        <p className="text-4xl font-bold text-slate-900">${totalFijos.toLocaleString('es-CL')}</p>
-        <p className="text-sm text-slate-500">{porcentaje.toFixed(1)} % del ingreso total</p>
-      </Card>
+      <ProgressSummary
+        title="Gastos fijos vs. ingreso"
+        amount={totalFijos}
+        income={ingreso.ingreso_total}
+        description="Así se distribuyen tus pagos obligatorios cada mes."
+        details={summaryDetails}
+      />
     </div>
   );
 };

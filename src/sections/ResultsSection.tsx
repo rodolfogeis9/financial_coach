@@ -1,6 +1,6 @@
 import { Card } from '../components/common/Card';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
-import { construirDiagnostico } from '../utils/financialLogic';
+import { construirDiagnostico, Totales } from '../utils/financialLogic';
 
 const gradeColor = (nota: number) => {
   if (nota < 40) return 'bg-red-100 text-red-700';
@@ -11,18 +11,20 @@ const gradeColor = (nota: number) => {
 export const ResultsSection = () => {
   const { perfil } = useFinancialProfile();
   const resultado = construirDiagnostico(perfil);
-
-  if (resultado.error) {
-    return (
-      <Card title="Revisa tus datos">
-        <p className="rounded-2xl bg-yellow-50 px-4 py-3 text-sm text-yellow-800">{resultado.error}</p>
-      </Card>
-    );
-  }
-
   const { diagnostico, ratios, totales } = resultado;
+  const puedeMostrarDiagnostico = Boolean(ratios) && !resultado.error;
+
   if (!ratios) {
-    return null;
+    return (
+      <div className="space-y-6">
+        <BalanceCard totales={totales} error={resultado.error} />
+        <Card title="Salud financiera">
+          <p className="rounded-2xl bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+            {resultado.error ?? 'Ingresa tus datos para ver el resultado completo.'}
+          </p>
+        </Card>
+      </div>
+    );
   }
   const statusAhorro = ratios.ra >= 0.2 ? 'good' : ratios.ra >= 0.1 ? 'warn' : 'bad';
   const statusCF = ratios.cf <= 0.3 ? 'good' : ratios.cf <= 0.4 ? 'warn' : 'bad';
@@ -47,6 +49,16 @@ export const ResultsSection = () => {
 
   return (
     <div className="space-y-6">
+      <BalanceCard totales={totales} error={resultado.error} />
+      {!puedeMostrarDiagnostico && (
+        <Card title="Salud financiera">
+          <p className="rounded-2xl bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+            {resultado.error ?? 'Ingresa tus datos para ver el resultado completo.'}
+          </p>
+        </Card>
+      )}
+      {puedeMostrarDiagnostico && (
+        <>
       <div className="grid gap-6 md:grid-cols-2">
         <Card title="Nota global">
           <div className="flex flex-col items-start gap-4">
@@ -136,13 +148,8 @@ export const ResultsSection = () => {
           </ul>
         </Card>
       </div>
-      <Card title="Totales">
-        <dl className="grid gap-4 md:grid-cols-3">
-          <Stat label="Ingreso mensual" value={totales.ingreso} />
-          <Stat label="Gasto + ahorro" value={totales.total_gasto_ahorro} />
-          <Stat label="Diferencia" value={totales.diferencia} highlight />
-        </dl>
-      </Card>
+        </>
+      )}
     </div>
   );
 };
@@ -178,9 +185,51 @@ const RatioBox = ({
   </div>
 );
 
-const Stat = ({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) => (
-  <div>
-    <p className="text-sm text-slate-500">{label}</p>
-    <p className={`text-2xl font-bold ${highlight ? 'text-red-600' : 'text-slate-900'}`}>${value.toLocaleString('es-CL')}</p>
-  </div>
-);
+const BalanceCard = ({ totales, error }: { totales: Totales; error?: string }) => {
+  const deficit = totales.diferencia < 0;
+  const sinAsignar = totales.diferencia > 0;
+  let message = '';
+  if (error) {
+    message = error;
+  } else if (totales.ingreso <= 0) {
+    message = 'Ingresa tu ingreso mensual para obtener tu diagnóstico.';
+  } else if (deficit) {
+    message = `Tus gastos + inversiones superan tus ingresos en $${Math.abs(totales.diferencia).toLocaleString('es-CL')}.`;
+  } else if (sinAsignar) {
+    message = `Aún tienes $${totales.diferencia.toLocaleString('es-CL')} sin asignar. Decide si serán ahorro o gastos.`;
+  } else {
+    message = '¡Perfecto! Estás asignando el 100 % de tu ingreso mensual.';
+  }
+
+  const breakdown = [
+    { label: 'Necesidades (NV)', value: totales.total_NV },
+    { label: 'Deuda de consumo (DM)', value: totales.total_DM },
+    { label: 'Deuda buena (DB)', value: totales.total_DB },
+    { label: 'Estilo de vida (EV)', value: totales.total_EV },
+    { label: 'Imprevistos (IM)', value: totales.total_IM },
+    { label: 'Ahorro / inversión (AI)', value: totales.total_AI }
+  ];
+
+  return (
+    <Card title="Balance mensual">
+      <div className="space-y-2">
+        <p className="text-sm text-slate-500">Ingreso vs. dinero asignado</p>
+        <div className="flex flex-wrap gap-6 text-2xl font-bold text-slate-900">
+          <span>Ingreso: ${totales.ingreso.toLocaleString('es-CL')}</span>
+          <span>Asignado: ${totales.total_gasto_ahorro.toLocaleString('es-CL')}</span>
+        </div>
+        <p className={`text-sm font-semibold ${deficit ? 'text-red-600' : sinAsignar ? 'text-amber-600' : 'text-emerald-600'}`}>
+          {message}
+        </p>
+      </div>
+      <ul className="grid gap-3 md:grid-cols-2">
+        {breakdown.map((item) => (
+          <li key={item.label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 text-sm">
+            <span className="text-slate-500">{item.label}</span>
+            <span className="font-semibold text-slate-900">${item.value.toLocaleString('es-CL')}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+};
