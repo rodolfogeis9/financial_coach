@@ -2,6 +2,7 @@ import { NumericInput } from '../components/common/NumericInput';
 import { Card } from '../components/common/Card';
 import { TipoVivienda, TipoOtroIngreso } from '../types/financial';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
+import { v4 as uuidv4 } from 'uuid';
 
 const viviendaOptions = [
   { label: 'Propia con hipoteca', value: TipoVivienda.PROPIA_HIPOTECA },
@@ -21,6 +22,30 @@ export const IncomeSection = () => {
   const { perfil, setPerfil, updateIngreso } = useFinancialProfile();
   const { usuario, ingreso } = perfil;
 
+  const handleOtroChange = (id: string, updates: Partial<(typeof ingreso)['otros_ingresos'][number]>) => {
+    const updated = ingreso.otros_ingresos.map((item) => (item.id === id ? { ...item, ...updates } : item));
+    updateIngreso({ otros_ingresos: updated });
+  };
+
+  const addOtroIngreso = () => {
+    updateIngreso({
+      otros_ingresos: [
+        ...ingreso.otros_ingresos,
+        {
+          id: uuidv4(),
+          tipo: 'OTROS' as TipoOtroIngreso,
+          monto: 0
+        }
+      ]
+    });
+  };
+
+  const removeOtroIngreso = (id: string) => {
+    updateIngreso({ otros_ingresos: ingreso.otros_ingresos.filter((item) => item.id !== id) });
+  };
+
+  const totalOtros = ingreso.otros_ingresos.reduce((sum, item) => sum + (item.monto || 0), 0);
+
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-6">
@@ -31,10 +56,12 @@ export const IncomeSection = () => {
               <input
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
                 value={usuario.nombre}
-                onChange={(e) => setPerfil((prev) => ({
-                  ...prev,
-                  usuario: { ...prev.usuario, nombre: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setPerfil((prev) => ({
+                    ...prev,
+                    usuario: { ...prev.usuario, nombre: e.target.value }
+                  }))
+                }
               />
             </label>
             <NumericInput
@@ -46,17 +73,6 @@ export const IncomeSection = () => {
               tooltip="Edad en años"
               prefix=""
             />
-            <label className="text-sm font-medium text-slate-700">
-              Ciudad
-              <input
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.ciudad}
-                onChange={(e) => setPerfil((prev) => ({
-                  ...prev,
-                  usuario: { ...prev.usuario, ciudad: e.target.value }
-                }))}
-              />
-            </label>
             <NumericInput
               label="Adultos en el hogar"
               value={usuario.adultos || ''}
@@ -108,28 +124,59 @@ export const IncomeSection = () => {
               value={ingreso.bonos_mensualizados || ''}
               onChange={(e) => updateIngreso({ bonos_mensualizados: Number(e.target.value) || 0 })}
             />
-            <NumericInput
-              label="Otros ingresos"
-              value={ingreso.otros_ingresos || ''}
-              onChange={(e) => updateIngreso({ otros_ingresos: Number(e.target.value) || 0 })}
-            />
-            <label className="text-sm font-medium text-slate-700">
-              Tipo de otros ingresos
-              <select
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={ingreso.otros_ingresos_tipo}
-                onChange={(e) => updateIngreso({ otros_ingresos_tipo: e.target.value as TipoOtroIngreso })}
-              >
-                {otrosOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
-          <p className="text-sm text-slate-600">
-            ingreso_total = sueldo neto + bonos mensualizados + otros ingresos
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-semibold text-slate-700">Otros ingresos</h4>
+              <button
+                type="button"
+                onClick={addOtroIngreso}
+                className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+              >
+                + Agregar otro ingreso
+              </button>
+            </div>
+            {ingreso.otros_ingresos.length === 0 && (
+              <p className="text-sm text-slate-500">Si tienes arriendos, freelance u otros ingresos, regístralos aquí.</p>
+            )}
+            <div className="space-y-3">
+              {ingreso.otros_ingresos.map((item) => (
+                <div key={item.id} className="grid gap-3 md:grid-cols-[1fr,1fr,auto]">
+                  <label className="text-sm font-medium text-slate-700">
+                    Tipo
+                    <select
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                      value={item.tipo}
+                      onChange={(e) => handleOtroChange(item.id, { tipo: e.target.value as TipoOtroIngreso })}
+                    >
+                      {otrosOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <NumericInput
+                    label="Monto mensual"
+                    value={item.monto || ''}
+                    onChange={(e) => handleOtroChange(item.id, { monto: Number(e.target.value) || 0 })}
+                  />
+                  <button
+                    type="button"
+                    className="self-end text-xs font-semibold text-red-500"
+                    onClick={() => removeOtroIngreso(item.id)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-slate-600">
+              Total otros ingresos: ${totalOtros.toLocaleString('es-CL')} (se suma automáticamente al ingreso mensual).
+            </p>
+          </div>
+          <p className="mt-4 text-sm text-slate-600">
+            ingreso_total = sueldo neto + bonos mensualizados + suma de otros ingresos
           </p>
         </Card>
       </div>

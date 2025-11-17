@@ -7,7 +7,6 @@ import { FixedExpensesSection } from './sections/FixedExpensesSection';
 import { VariableExpensesSection } from './sections/VariableExpensesSection';
 import { DebtSection } from './sections/DebtSection';
 import { SavingsSection } from './sections/SavingsSection';
-import { GoalsSection } from './sections/GoalsSection';
 import { ResultsSection } from './sections/ResultsSection';
 import { SimulatorSection } from './sections/SimulatorSection';
 import { useFinancialProfile } from './hooks/useFinancialProfile';
@@ -21,7 +20,6 @@ const sectionLabels: Record<SeccionClave, string> = {
   gastos_variables: 'Gastos variables',
   deudas: 'Deudas',
   ahorro: 'Ahorros e inversiones',
-  metas: 'Metas',
   resultado: 'Resultado y salud financiera',
   simulador: 'Simulador'
 };
@@ -39,7 +37,6 @@ export default function App() {
     gastos_variables: perfil.gastos.lista_items.some((g) => !g.fijo && g.monto_mensual > 0),
     deudas: perfil.deudas.lista_deudas.some((d) => d.cuota_mensual > 0),
     ahorro: perfil.ahorro.ahorro_mensual_total > 0,
-    metas: perfil.metas.lista_metas.length > 0,
     resultado: hasIncome && totales.valido,
     simulador: hasIncome
   }), [perfil, hasIncome, totales.valido]);
@@ -51,7 +48,6 @@ export default function App() {
     'gastos_variables',
     'deudas',
     'ahorro',
-    'metas',
     'resultado',
     'simulador'
   ];
@@ -70,8 +66,6 @@ export default function App() {
         return <DebtSection />;
       case 'ahorro':
         return <SavingsSection />;
-      case 'metas':
-        return <GoalsSection />;
       case 'resultado':
         return <ResultsSection />;
       case 'simulador':

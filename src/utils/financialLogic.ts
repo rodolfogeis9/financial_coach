@@ -1,4 +1,13 @@
-import { PerfilFinanciero, TipoAgrupador } from '../types/financial';
+import { InsightCategoria, PerfilFinanciero, TipoAgrupador } from '../types/financial';
+
+export const DISTRIBUCION_IDEAL = {
+  NV: { min: 0.5, max: 0.6 },
+  DM: { min: 0, max: 0.1 },
+  DB: { min: 0, max: 0.2 },
+  AI: { min: 0.15, max: 0.3 },
+  EV: { min: 0.1, max: 0.2 },
+  IM: { min: 0.05, max: 0.1 }
+};
 
 export interface Totales {
   ingreso: number;
@@ -36,6 +45,8 @@ const safeDiv = (num: number, den: number) => {
   }
   return num / den;
 };
+
+const formatAmount = (value: number) => (Number.isFinite(value) ? value : 0);
 
 export const calcularTotales = (perfil: PerfilFinanciero): Totales => {
   const ingreso = Number(perfil.ingreso.ingreso_total) || 0;
@@ -142,7 +153,7 @@ export const calcularSubnotas = (ratios: Ratios): {
   sub_estilo: number;
   sub_fondo: number;
 } => {
-  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
   const { ra, cf_dm, nv_ratio, p_EV, meses_fondo_emergencia, meses_objetivo } = ratios;
 
@@ -218,10 +229,20 @@ export const generarAlertas = (
 export const generarRecomendaciones = (
   perfil: PerfilFinanciero,
   totales: Totales,
-  ratios: Ratios
+  ratios: Ratios,
+  notaGlobal: number
 ): string[] => {
   const recomendaciones: string[] = [];
   const ingreso = totales.ingreso || 1;
+
+  if (notaGlobal < 70) {
+    const foco = ratios.ra < 0.15 ? 'aumentar tu ahorro mensual y alimentar el fondo de emergencia' : 'reducir deuda de consumo y ordenar gastos de estilo de vida';
+    recomendaciones.push(
+      `Tu nota global es ${notaGlobal}/100. Si te enfocas en ${foco}, puedes llevarla sobre 70 en los próximos meses.`
+    );
+  } else {
+    recomendaciones.push(`Tu nota global es ${notaGlobal}/100. Mantén tu disciplina para sostener esta salud financiera.`);
+  }
 
   const ra_objetivo = 0.2;
   const ahorro_objetivo = ingreso * ra_objetivo;
@@ -309,6 +330,127 @@ export const generarRecomendaciones = (
   return recomendaciones.slice(0, 5);
 };
 
+const construirInsights = (totales: Totales, ratios: Ratios): InsightCategoria[] => {
+  const ingreso = totales.ingreso || 1;
+  const insights: InsightCategoria[] = [];
+
+  const ahorroActual = ratios.ra;
+  const ahorroAceptable = 0.15;
+  const ahorroIdeal = 0.2;
+  let descAhorro = '';
+  if (ahorroActual >= ahorroIdeal) {
+    descAhorro = 'Tu nivel de ahorro está en el rango ideal para tu ingreso.';
+  } else if (ahorroActual >= ahorroAceptable) {
+    descAhorro = 'Tu nivel de ahorro es aceptable, pero aún puedes incrementarlo para ganar resiliencia.';
+  } else {
+    descAhorro = 'Tu nivel de ahorro es bajo para tu ingreso actual.';
+  }
+  let brechaAhorro: InsightCategoria['brecha'];
+  if (ahorroActual < ahorroIdeal) {
+    const objetivo = ahorroActual < ahorroAceptable ? ahorroAceptable : ahorroIdeal;
+    const delta = objetivo - ahorroActual;
+    const monto = formatAmount(delta * ingreso);
+    brechaAhorro = {
+      porcentaje: delta * 100,
+      monto,
+      mensaje: `Para mejorar tu nota de ahorro deberías ahorrar ${(delta * 100).toFixed(1)} % adicional (${monto.toFixed(0)} al mes).`
+    };
+  }
+  insights.push({ clave: 'ahorro', titulo: 'Ahorro e inversión', descripcion: descAhorro, brecha: brechaAhorro });
+
+  const deudaActual = ratios.cf_dm;
+  const deudaAceptable = 0.2;
+  const deudaIdeal = 0.1;
+  let descDeuda = '';
+  if (deudaActual <= deudaIdeal) {
+    descDeuda = 'Tus deudas de consumo están controladas.';
+  } else if (deudaActual <= deudaAceptable) {
+    descDeuda = 'Tus deudas de consumo son manejables, pero podrías reducirlas para liberar flujo.';
+  } else {
+    descDeuda = 'Tus deudas de consumo están muy altas en relación a tu ingreso.';
+  }
+  let brechaDeuda: InsightCategoria['brecha'];
+  if (deudaActual > deudaIdeal) {
+    const objetivo = deudaActual > deudaAceptable ? deudaAceptable : deudaIdeal;
+    const delta = deudaActual - objetivo;
+    const monto = formatAmount(delta * ingreso);
+    brechaDeuda = {
+      porcentaje: delta * 100,
+      monto,
+      mensaje: `Para mejorar tu nota de deuda reduce tus cuotas mensuales de deuda mala en ${(delta * 100).toFixed(1)} % (${monto.toFixed(0)}).`
+    };
+  }
+  insights.push({ clave: 'deuda', titulo: 'Deuda de consumo', descripcion: descDeuda, brecha: brechaDeuda });
+
+  const necesidadesActual = ratios.p_NV;
+  let descNecesidades = '';
+  if (necesidadesActual >= 0.5 && necesidadesActual <= 0.6) {
+    descNecesidades = 'Tus necesidades vitales están en el rango recomendado.';
+  } else if (necesidadesActual > 0.6) {
+    descNecesidades = 'Tus necesidades vitales pesan demasiado dentro de tu presupuesto.';
+  } else {
+    descNecesidades = 'Tus gastos básicos están por debajo del 50 % del ingreso, lo que te da flexibilidad.';
+  }
+  let brechaNV: InsightCategoria['brecha'];
+  if (necesidadesActual > 0.6) {
+    const delta = necesidadesActual - 0.6;
+    const monto = formatAmount(delta * ingreso);
+    brechaNV = {
+      porcentaje: delta * 100,
+      monto,
+      mensaje: `Para volver al rango ideal reduce gastos fijos en al menos ${(delta * 100).toFixed(1)} % (${monto.toFixed(0)}).`
+    };
+  }
+  insights.push({ clave: 'necesidades', titulo: 'Necesidades vitales', descripcion: descNecesidades, brecha: brechaNV });
+
+  const estiloActual = ratios.p_EV;
+  const estiloAceptable = 0.25;
+  const estiloIdeal = 0.2;
+  let descEstilo = '';
+  if (estiloActual <= estiloIdeal) {
+    descEstilo = 'Tus gastos de estilo de vida están balanceados con tu ingreso.';
+  } else if (estiloActual <= estiloAceptable) {
+    descEstilo = 'Tus gastos de estilo están dentro del rango permitido, pero podrías optimizarlos.';
+  } else {
+    descEstilo = 'Tus gastos de estilo de vida compiten con tus metas de ahorro.';
+  }
+  let brechaEstilo: InsightCategoria['brecha'];
+  if (estiloActual > estiloIdeal) {
+    const objetivo = estiloActual > estiloAceptable ? estiloAceptable : estiloIdeal;
+    const delta = estiloActual - objetivo;
+    const monto = formatAmount(delta * ingreso);
+    brechaEstilo = {
+      porcentaje: delta * 100,
+      monto,
+      mensaje: `Recorta estilo de vida en ${(delta * 100).toFixed(1)} % (${monto.toFixed(0)}) para acercarte al rango ideal.`
+    };
+  }
+  insights.push({ clave: 'estilo', titulo: 'Estilo de vida', descripcion: descEstilo, brecha: brechaEstilo });
+
+  const fondoActual = ratios.meses_fondo_emergencia;
+  const fondoObjetivo = ratios.meses_objetivo;
+  let descFondo = '';
+  if (fondoActual >= fondoObjetivo) {
+    descFondo = 'Tu fondo de emergencia ya cubre el objetivo recomendado.';
+  } else if (fondoActual >= fondoObjetivo / 2) {
+    descFondo = 'Vas encaminado con tu fondo de emergencia, pero aún falta para llegar al objetivo.';
+  } else {
+    descFondo = 'Tu fondo de emergencia es insuficiente para enfrentar imprevistos.';
+  }
+  let brechaFondo: InsightCategoria['brecha'];
+  if (fondoActual < fondoObjetivo) {
+    const deltaMeses = fondoObjetivo - fondoActual;
+    brechaFondo = {
+      porcentaje: (deltaMeses / (fondoObjetivo || 1)) * 100,
+      monto: formatAmount(ratios.gap_fondo_emergencia),
+      mensaje: `Ahorra $${formatAmount(ratios.gap_fondo_emergencia).toFixed(0)} adicionales para sumar ${deltaMeses.toFixed(1)} meses de respaldo.`
+    };
+  }
+  insights.push({ clave: 'fondo', titulo: 'Fondo de emergencia', descripcion: descFondo, brecha: brechaFondo });
+
+  return insights;
+};
+
 export interface DiagnosticoResultado {
   totales: Totales;
   ratios?: Ratios;
@@ -335,7 +477,8 @@ export const construirDiagnostico = (perfil: PerfilFinanciero): DiagnosticoResul
     subnotas.sub_ahorro + subnotas.sub_deuda + subnotas.sub_necesidades + subnotas.sub_estilo + subnotas.sub_fondo
   );
   const alertas = generarAlertas(perfil, totales, ratios);
-  const recomendaciones = generarRecomendaciones(perfil, totales, ratios);
+  const insights = construirInsights(totales, ratios);
+  const recomendaciones = generarRecomendaciones(perfil, totales, ratios, nota_global);
 
   return {
     totales,
@@ -343,6 +486,7 @@ export const construirDiagnostico = (perfil: PerfilFinanciero): DiagnosticoResul
     diagnostico: {
       nota_global,
       subnotas,
+      insights,
       ratios: {
         p_NV: ratios.p_NV,
         p_DM: ratios.p_DM,
@@ -354,7 +498,9 @@ export const construirDiagnostico = (perfil: PerfilFinanciero): DiagnosticoResul
         cf_dm: ratios.cf_dm,
         ra: ratios.ra,
         nv_ratio: ratios.nv_ratio,
-        meses_fondo_emergencia: ratios.meses_fondo_emergencia
+        meses_fondo_emergencia: ratios.meses_fondo_emergencia,
+        meses_objetivo: ratios.meses_objetivo,
+        gap_fondo_emergencia: ratios.gap_fondo_emergencia
       },
       alertas,
       recomendaciones

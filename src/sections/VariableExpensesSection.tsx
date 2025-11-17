@@ -7,12 +7,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { ProgressSummary } from '../components/common/ProgressSummary';
 
 const variableBlocks = [
-  { title: 'Alimentación', description: 'Compras del mes, verduras, carnes y delivery.', items: ['supermercado', 'verduleria', 'carnes', 'delivery'] },
-  { title: 'Transporte variable', description: 'Gastos ajustables de movilidad.', items: ['bencina', 'transporte_publico', 'uber'] },
-  { title: 'Gastos del hogar', description: 'Aseo, mantenciones e imprevistos.', items: ['aseo', 'mantencion', 'reparaciones'] },
-  { title: 'Diversión y estilo de vida', description: 'Ocio, hobbies y viajes.', items: ['restaurantes', 'cine', 'gimnasio', 'viajes', 'mesada'] },
-  { title: 'Hijos', description: 'Actividades y ropa extra.', items: ['actividades_hijos', 'ropa_hijos'] },
-  { title: 'Mascotas', description: 'Cuidado animal.', items: ['alimento_mascotas', 'veterinario', 'aseo_mascotas'] }
+  { id: 'alimentacion', title: 'Alimentación', description: 'Supermercado, feria, carnes y delivery.', items: ['supermercado', 'verduleria', 'carnes', 'delivery'] },
+  { id: 'transporte_var', title: 'Transporte variable', description: 'Transporte público y apps.', items: ['transporte_publico', 'uber'] },
+  { id: 'hogar', title: 'Gastos del hogar', description: 'Aseo externo, mantenciones e imprevistos menores.', items: ['aseo', 'mantencion', 'reparaciones'] },
+  {
+    id: 'diversion',
+    title: 'Diversión y estilo de vida',
+    description: 'Restaurantes, panoramas, streaming y viajes.',
+    items: ['restaurantes', 'cine', 'streaming', 'gimnasio', 'viajes', 'mesada']
+  },
+  { id: 'hijos', title: 'Hijos', description: 'Actividades, ropa y extras para hijos.', items: ['actividades_hijos', 'ropa_hijos'] },
+  {
+    id: 'mascotas',
+    title: 'Mascotas',
+    description: 'Alimento, veterinario, grooming y paseos.',
+    items: ['alimento_mascotas', 'veterinario', 'aseo_mascotas', 'paseo_mascotas']
+  }
 ];
 
 const categoriaOptions = Object.values(CategoriaGasto);
@@ -33,23 +43,47 @@ export const VariableExpensesSection = () => {
     upsertGasto({ ...gasto, monto_mensual: value });
   };
 
-  const blockSubtotal = (ids: string[]) =>
-    ids.reduce((sum, id) => sum + (getGasto(id)?.monto_mensual || 0), 0);
+  const hijosExtras = perfil.gastos.lista_items.filter((g) => g.id.startsWith('hijos_otro'));
+  const mascotaExtras = perfil.gastos.lista_items.filter((g) => g.id.startsWith('mascotas_otro'));
+
+  const blockSubtotal = (blockId: string, ids: string[]) => {
+    const base = ids.reduce((sum, id) => sum + (getGasto(id)?.monto_mensual || 0), 0);
+    if (blockId === 'hijos') {
+      return base + hijosExtras.reduce((sum, gasto) => sum + (gasto.monto_mensual || 0), 0);
+    }
+    if (blockId === 'mascotas') {
+      return base + mascotaExtras.reduce((sum, gasto) => sum + (gasto.monto_mensual || 0), 0);
+    }
+    return base;
+  };
 
   const otrosGastos = perfil.gastos.lista_items.filter((g) => !variableBlocks.some((block) => block.items.includes(g.id)) && !g.fijo);
   const totalOtros = otrosGastos.reduce((sum, gasto) => sum + gasto.monto_mensual, 0);
 
-  const totalVariables = variableBlocks.reduce((sum, block) => sum + blockSubtotal(block.items), 0) + totalOtros;
+  const totalVariables = variableBlocks.reduce((sum, block) => sum + blockSubtotal(block.id, block.items), 0) + totalOtros;
   const summaryDetails = [
     ...variableBlocks.map((block) => ({
       label: block.title,
-      value: `$${blockSubtotal(block.items).toLocaleString('es-CL')}`
+      value: `$${blockSubtotal(block.id, block.items).toLocaleString('es-CL')}`
     })),
     {
       label: 'Otros flexibles',
       value: `$${totalOtros.toLocaleString('es-CL')}`
     }
   ];
+
+  const addCustomGasto = (scope: 'hijos' | 'mascotas') => {
+    const id = `${scope}_otro_${uuidv4()}`;
+    const categoria = scope === 'hijos' ? CategoriaGasto.HIJOS : CategoriaGasto.MASCOTAS;
+    upsertGasto({
+      id,
+      nombre: scope === 'hijos' ? 'Otro gasto hijos' : 'Otro gasto mascotas',
+      monto_mensual: 0,
+      categoria_principal: categoria,
+      tipo_agrupador: scope === 'mascotas' ? TipoAgrupador.IM : TipoAgrupador.NV,
+      fijo: false
+    });
+  };
 
   const addOtroGasto = () => {
     if (!nuevoNombre || nuevoMonto <= 0) return;
@@ -70,7 +104,11 @@ export const VariableExpensesSection = () => {
     <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-6">
         {variableBlocks.map((block) => (
-          <Card key={block.title} title={block.title} actions={<span className="text-sm font-semibold text-slate-500">Subtotal: ${blockSubtotal(block.items).toLocaleString('es-CL')}</span>}>
+          <Card
+            key={block.title}
+            title={block.title}
+            actions={<span className="text-sm font-semibold text-slate-500">Subtotal: ${blockSubtotal(block.id, block.items).toLocaleString('es-CL')}</span>}
+          >
             <p className="text-sm text-slate-500">{block.description}</p>
             <div className="grid gap-4 md:grid-cols-2">
               {block.items.map((id) => {
@@ -85,6 +123,70 @@ export const VariableExpensesSection = () => {
                 />
               );
             })}
+              {block.id === 'hijos' && (
+                <div className="md:col-span-2 space-y-3">
+                  {hijosExtras.length === 0 && <p className="text-sm text-slate-500">Agrega otras actividades, materiales o salidas asociadas a tus hijos.</p>}
+                  {hijosExtras.map((gasto) => (
+                    <div key={gasto.id} className="grid gap-3 md:grid-cols-[1fr,1fr,auto]">
+                      <label className="text-sm font-medium text-slate-700">
+                        Nombre
+                        <input
+                          className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                          value={gasto.nombre}
+                          onChange={(e) => upsertGasto({ ...gasto, nombre: e.target.value })}
+                        />
+                      </label>
+                      <NumericInput
+                        label="Monto mensual"
+                        value={gasto.monto_mensual || ''}
+                        onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                      />
+                      <button className="self-end text-xs font-semibold text-red-500" onClick={() => removeGasto(gasto.id)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="rounded-xl border border-dashed border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600"
+                    onClick={() => addCustomGasto('hijos')}
+                  >
+                    + Otros hijos
+                  </button>
+                </div>
+              )}
+              {block.id === 'mascotas' && (
+                <div className="md:col-span-2 space-y-3">
+                  {mascotaExtras.length === 0 && <p className="text-sm text-slate-500">Incluye paseos, daycare u otros costos de tus mascotas.</p>}
+                  {mascotaExtras.map((gasto) => (
+                    <div key={gasto.id} className="grid gap-3 md:grid-cols-[1fr,1fr,auto]">
+                      <label className="text-sm font-medium text-slate-700">
+                        Nombre
+                        <input
+                          className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                          value={gasto.nombre}
+                          onChange={(e) => upsertGasto({ ...gasto, nombre: e.target.value })}
+                        />
+                      </label>
+                      <NumericInput
+                        label="Monto mensual"
+                        value={gasto.monto_mensual || ''}
+                        onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                      />
+                      <button className="self-end text-xs font-semibold text-red-500" onClick={() => removeGasto(gasto.id)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="rounded-xl border border-dashed border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600"
+                    onClick={() => addCustomGasto('mascotas')}
+                  >
+                    + Otros mascotas
+                  </button>
+                </div>
+              )}
           </div>
         </Card>
       ))}
