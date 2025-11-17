@@ -18,5 +18,6 @@ COPY --from=build /app/dist .
 # Config SPA para manejar rutas de front
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+ENV PORT=8080
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
