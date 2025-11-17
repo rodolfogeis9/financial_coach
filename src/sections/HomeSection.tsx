@@ -8,8 +8,8 @@ export const HomeSection = ({ onStart }: HomeProps) => (
   <div className="space-y-6">
     <Card title="Financial Health Coach">
       <p>
-        Usa tu ingreso mensual neto para obtener una fotografía completa de tu salud financiera. Te pediremos tus
-        gastos, deudas, ahorros y metas para construir una nota del 1 al 100 con recomendaciones claras.
+        Completa tu información financiera mensual y obtén una fotografía clara de tu salud financiera. Te pediremos tus gastos,
+        deudas, ahorros y hábitos de consumo para construir una nota del 1 al 100 con recomendaciones accionables.
       </p>
       <ul className="list-disc pl-5 text-slate-600">
         <li>Trabajamos solo con los datos que ingresas en este navegador.</li>

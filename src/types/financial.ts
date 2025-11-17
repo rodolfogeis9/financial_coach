@@ -35,19 +35,9 @@ export enum TipoDeuda {
   OTRA = 'OTRA'
 }
 
-export enum TipoMeta {
-  FONDO_EMERGENCIA = 'FONDO_EMERGENCIA',
-  PAGAR_DEUDAS = 'PAGAR_DEUDAS',
-  COMPRAR_VIVIENDA = 'COMPRAR_VIVIENDA',
-  COMPRAR_AUTO = 'COMPRAR_AUTO',
-  VIAJE = 'VIAJE',
-  JUBILACION = 'JUBILACION'
-}
-
 export interface Usuario {
   nombre: string;
   edad: number;
-  ciudad: string;
   adultos: number;
   ninos: number;
   tipo_vivienda: TipoVivienda;
@@ -55,11 +45,16 @@ export interface Usuario {
 
 export type TipoOtroIngreso = 'ARRIENDOS' | 'FREELANCE' | 'PENSION' | 'OTROS';
 
+export interface OtroIngreso {
+  id: string;
+  tipo: TipoOtroIngreso;
+  monto: number;
+}
+
 export interface Ingreso {
   sueldo_neto: number;
   bonos_mensualizados: number;
-  otros_ingresos: number;
-  otros_ingresos_tipo: TipoOtroIngreso;
+  otros_ingresos: OtroIngreso[];
   ingreso_total: number;
 }
 
@@ -82,22 +77,25 @@ export interface Deuda {
 }
 
 export interface Ahorro {
-  ahorro_mensual_corto_plazo: number;
-  ahorro_mensual_mediano_plazo: number;
-  ahorro_mensual_largo_plazo: number;
-  ahorro_mensual_fondos_mutuos: number;
-  ahorro_mensual_etf: number;
-  ahorro_mensual_cripto: number;
+  horizontes: Record<HorizonteInversion, HorizonteDetalle>;
   ahorro_mensual_total: number;
   fondo_emergencia_actual: number;
   inversiones_largo_plazo_actuales: number;
 }
 
-export interface Meta {
+export type HorizonteInversion = 'corto' | 'mediano' | 'largo';
+
+export interface InstrumentoFinanciero {
   id: string;
-  tipo: TipoMeta;
-  monto_objetivo?: number;
-  plazo_meses?: number;
+  tipo: string;
+  monto: number;
+}
+
+export interface HorizonteDetalle {
+  monto_mensual: number;
+  instrumentos_mensuales: InstrumentoFinanciero[];
+  stock_actual: number;
+  instrumentos_stock: InstrumentoFinanciero[];
 }
 
 export interface Diagnostico {
@@ -109,6 +107,7 @@ export interface Diagnostico {
     sub_estilo: number;
     sub_fondo: number;
   };
+  insights: InsightCategoria[];
   ratios: {
     p_NV: number;
     p_DM: number;
@@ -121,9 +120,22 @@ export interface Diagnostico {
     ra: number;
     nv_ratio: number;
     meses_fondo_emergencia: number;
+    meses_objetivo: number;
+    gap_fondo_emergencia: number;
   };
   alertas: string[];
   recomendaciones: string[];
+}
+
+export interface InsightCategoria {
+  clave: 'ahorro' | 'deuda' | 'necesidades' | 'estilo' | 'fondo';
+  titulo: string;
+  descripcion: string;
+  brecha?: {
+    porcentaje?: number;
+    monto?: number;
+    mensaje: string;
+  };
 }
 
 export interface PerfilFinanciero {
@@ -136,9 +148,6 @@ export interface PerfilFinanciero {
     lista_deudas: Deuda[];
   };
   ahorro: Ahorro;
-  metas: {
-    lista_metas: Meta[];
-  };
   diagnostico: Diagnostico;
 }
 
@@ -149,6 +158,5 @@ export type SeccionClave =
   | 'gastos_variables'
   | 'deudas'
   | 'ahorro'
-  | 'metas'
   | 'resultado'
   | 'simulador';

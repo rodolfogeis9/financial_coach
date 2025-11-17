@@ -1,15 +1,5 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
-import {
-  CategoriaGasto,
-  Deuda,
-  Gasto,
-  Meta,
-  PerfilFinanciero,
-  TipoAgrupador,
-  TipoDeuda,
-  TipoMeta,
-  TipoVivienda
-} from '../types/financial';
+import { CategoriaGasto, Deuda, Gasto, HorizonteDetalle, PerfilFinanciero, TipoAgrupador, TipoDeuda, TipoVivienda } from '../types/financial';
 
 const buildDefaultGasto = (id: string, nombre: string, categoria: CategoriaGasto, tipo: TipoAgrupador, fijo = true): Gasto => ({
   id,
@@ -20,20 +10,25 @@ const buildDefaultGasto = (id: string, nombre: string, categoria: CategoriaGasto
   fijo
 });
 
+const buildDefaultHorizonte = (): HorizonteDetalle => ({
+  monto_mensual: 0,
+  instrumentos_mensuales: [],
+  stock_actual: 0,
+  instrumentos_stock: []
+});
+
 const defaultProfile: PerfilFinanciero = {
   usuario: {
     nombre: '',
     edad: 0,
-    ciudad: '',
     adultos: 1,
     ninos: 0,
-    tipo_vivienda: TipoVivienda.ARRENDADA
+    tipo_vivienda: TipoVivienda.ARRENDADA // TODO: utilizar para personalizar insights de vivienda en próximas iteraciones
   },
   ingreso: {
     sueldo_neto: 0,
     bonos_mensualizados: 0,
-    otros_ingresos: 0,
-    otros_ingresos_tipo: 'OTROS',
+    otros_ingresos: [],
     ingreso_total: 0
   },
   gastos: {
@@ -49,36 +44,38 @@ const defaultProfile: PerfilFinanciero = {
       buildDefaultGasto('internet', 'Internet hogar', CategoriaGasto.SERVICIOS_BASICOS, TipoAgrupador.NV),
       buildDefaultGasto('celular', 'Celular plan', CategoriaGasto.SERVICIOS_BASICOS, TipoAgrupador.NV),
       buildDefaultGasto('tv_cable', 'TV cable', CategoriaGasto.SERVICIOS_BASICOS, TipoAgrupador.NV),
-      buildDefaultGasto('isapre', 'Plan de salud', CategoriaGasto.SALUD, TipoAgrupador.NV),
-      buildDefaultGasto('seguro_salud', 'Seguro salud', CategoriaGasto.SALUD, TipoAgrupador.NV),
+      buildDefaultGasto('salud_complementaria', 'Plan de salud complementario', CategoriaGasto.SALUD, TipoAgrupador.NV),
+      buildDefaultGasto('seguro_escolar', 'Seguro escolar', CategoriaGasto.SALUD, TipoAgrupador.NV),
       buildDefaultGasto('medicamentos', 'Medicamentos crónicos', CategoriaGasto.SALUD, TipoAgrupador.NV),
       buildDefaultGasto('credito_auto', 'Crédito auto', CategoriaGasto.TRANSPORTE, TipoAgrupador.DM),
       buildDefaultGasto('seguro_auto', 'Seguro auto', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV),
-      buildDefaultGasto('seguro_obligatorio', 'Seguro obligatorio', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV),
-      buildDefaultGasto('tag', 'TAG', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV),
+      buildDefaultGasto('bencina', 'Bencina / combustible mensual', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV),
+      buildDefaultGasto('tag', 'TAG / peajes', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV),
       buildDefaultGasto('colegios', 'Colegios', CategoriaGasto.EDUCACION, TipoAgrupador.NV),
-      buildDefaultGasto('preuniversitario', 'Preuniversitario obligatorio', CategoriaGasto.EDUCACION, TipoAgrupador.NV),
+      buildDefaultGasto('preuniversitario', 'Preuniversitarios', CategoriaGasto.EDUCACION, TipoAgrupador.NV),
       buildDefaultGasto('matriculas', 'Matrículas prorrateadas', CategoriaGasto.EDUCACION, TipoAgrupador.NV),
+      buildDefaultGasto('otros_educacion', 'Otros gastos educacionales', CategoriaGasto.EDUCACION, TipoAgrupador.NV),
       buildDefaultGasto('supermercado', 'Supermercado', CategoriaGasto.ALIMENTACION, TipoAgrupador.NV, false),
       buildDefaultGasto('verduleria', 'Verdulería', CategoriaGasto.ALIMENTACION, TipoAgrupador.NV, false),
       buildDefaultGasto('carnes', 'Carnes', CategoriaGasto.ALIMENTACION, TipoAgrupador.NV, false),
       buildDefaultGasto('delivery', 'Delivery comida', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
-      buildDefaultGasto('bencina', 'Bencina', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV, false),
       buildDefaultGasto('transporte_publico', 'Transporte público', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV, false),
       buildDefaultGasto('uber', 'Uber/Taxi', CategoriaGasto.TRANSPORTE, TipoAgrupador.NV, false),
       buildDefaultGasto('aseo', 'Aseo hogar', CategoriaGasto.OTROS, TipoAgrupador.NV, false),
       buildDefaultGasto('mantencion', 'Mantención hogar', CategoriaGasto.OTROS, TipoAgrupador.IM, false),
       buildDefaultGasto('reparaciones', 'Reparaciones', CategoriaGasto.OTROS, TipoAgrupador.IM, false),
       buildDefaultGasto('restaurantes', 'Restaurantes', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
-      buildDefaultGasto('cine', 'Cine y streaming', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
+      buildDefaultGasto('cine', 'Cine / panoramas', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
+      buildDefaultGasto('streaming', 'Streaming hogar', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
       buildDefaultGasto('gimnasio', 'Gimnasio', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
       buildDefaultGasto('viajes', 'Viajes', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
+      buildDefaultGasto('mesada', 'Mesada', CategoriaGasto.DIVERSION, TipoAgrupador.EV, false),
       buildDefaultGasto('actividades_hijos', 'Actividades hijos', CategoriaGasto.HIJOS, TipoAgrupador.NV, false),
       buildDefaultGasto('ropa_hijos', 'Ropa hijos', CategoriaGasto.HIJOS, TipoAgrupador.NV, false),
-      buildDefaultGasto('mesada', 'Mesada', CategoriaGasto.HIJOS, TipoAgrupador.EV, false),
       buildDefaultGasto('alimento_mascotas', 'Alimento mascotas', CategoriaGasto.MASCOTAS, TipoAgrupador.NV, false),
       buildDefaultGasto('veterinario', 'Veterinario', CategoriaGasto.MASCOTAS, TipoAgrupador.IM, false),
-      buildDefaultGasto('aseo_mascotas', 'Aseo mascotas', CategoriaGasto.MASCOTAS, TipoAgrupador.IM, false)
+      buildDefaultGasto('aseo_mascotas', 'Aseo / grooming', CategoriaGasto.MASCOTAS, TipoAgrupador.IM, false),
+      buildDefaultGasto('paseo_mascotas', 'Paseo mascotas', CategoriaGasto.MASCOTAS, TipoAgrupador.EV, false)
     ]
   },
   deudas: {
@@ -121,18 +118,14 @@ const defaultProfile: PerfilFinanciero = {
     ]
   },
   ahorro: {
-    ahorro_mensual_corto_plazo: 0,
-    ahorro_mensual_mediano_plazo: 0,
-    ahorro_mensual_largo_plazo: 0,
-    ahorro_mensual_fondos_mutuos: 0,
-    ahorro_mensual_etf: 0,
-    ahorro_mensual_cripto: 0,
+    horizontes: {
+      corto: buildDefaultHorizonte(),
+      mediano: buildDefaultHorizonte(),
+      largo: buildDefaultHorizonte()
+    },
     ahorro_mensual_total: 0,
     fondo_emergencia_actual: 0,
     inversiones_largo_plazo_actuales: 0
-  },
-  metas: {
-    lista_metas: []
   },
   diagnostico: {
     nota_global: 0,
@@ -143,6 +136,7 @@ const defaultProfile: PerfilFinanciero = {
       sub_estilo: 0,
       sub_fondo: 0
     },
+    insights: [],
     ratios: {
       p_NV: 0,
       p_DM: 0,
@@ -154,33 +148,64 @@ const defaultProfile: PerfilFinanciero = {
       cf_dm: 0,
       ra: 0,
       nv_ratio: 0,
-      meses_fondo_emergencia: 0
+      meses_fondo_emergencia: 0,
+      meses_objetivo: 0,
+      gap_fondo_emergencia: 0
     },
     alertas: [],
     recomendaciones: []
   }
 };
 
-const recalcIngreso = (ingreso: PerfilFinanciero['ingreso']) => ({
-  ...ingreso,
-  ingreso_total: Math.max(
-    0,
-    Number(ingreso.sueldo_neto) + Number(ingreso.bonos_mensualizados) + Number(ingreso.otros_ingresos)
-  )
-});
+const recalcIngreso = (ingreso: PerfilFinanciero['ingreso']) => {
+  const otros = ingreso.otros_ingresos.reduce((acc, item) => acc + Number(item.monto || 0), 0);
+  return {
+    ...ingreso,
+    ingreso_total: Math.max(0, Number(ingreso.sueldo_neto) + Number(ingreso.bonos_mensualizados) + otros)
+  };
+};
 
-const recalcAhorro = (ahorro: PerfilFinanciero['ahorro']) => ({
-  ...ahorro,
-  ahorro_mensual_total: Math.max(
-    0,
-    Number(ahorro.ahorro_mensual_corto_plazo) +
-      Number(ahorro.ahorro_mensual_mediano_plazo) +
-      Number(ahorro.ahorro_mensual_largo_plazo) +
-      Number(ahorro.ahorro_mensual_fondos_mutuos) +
-      Number(ahorro.ahorro_mensual_etf) +
-      Number(ahorro.ahorro_mensual_cripto)
-  )
-});
+const clampInstrumentos = (instrumentos: HorizonteDetalle['instrumentos_mensuales'], limite: number) => {
+  const total = instrumentos.reduce((acc, item) => acc + Number(item.monto || 0), 0);
+  if (total <= limite || limite === 0) {
+    return instrumentos.map((inst) => ({ ...inst, monto: Math.max(0, inst.monto) }));
+  }
+  const factor = limite / (total || 1);
+  return instrumentos.map((inst) => ({ ...inst, monto: Math.max(0, inst.monto) * factor }));
+};
+
+const normalizeHorizonte = (detalle: HorizonteDetalle): HorizonteDetalle => {
+  const monto_mensual = Math.max(0, Number(detalle.monto_mensual) || 0);
+  const stock_actual = Math.max(0, Number(detalle.stock_actual) || 0);
+  return {
+    ...detalle,
+    monto_mensual,
+    stock_actual,
+    instrumentos_mensuales: clampInstrumentos(detalle.instrumentos_mensuales, monto_mensual),
+    instrumentos_stock: clampInstrumentos(detalle.instrumentos_stock, stock_actual)
+  };
+};
+
+const recalcAhorro = (ahorro: PerfilFinanciero['ahorro']) => {
+  const horizontesNormalizados = {
+    corto: normalizeHorizonte(ahorro.horizontes.corto),
+    mediano: normalizeHorizonte(ahorro.horizontes.mediano),
+    largo: normalizeHorizonte(ahorro.horizontes.largo)
+  };
+  const ahorro_mensual_total = (Object.values(horizontesNormalizados) as HorizonteDetalle[]).reduce(
+    (acc, horizonte) => acc + Number(horizonte.monto_mensual || 0),
+    0
+  );
+  const fondo_emergencia_actual = horizontesNormalizados.corto.stock_actual;
+  const inversiones_largo_plazo_actuales = horizontesNormalizados.largo.stock_actual;
+  return {
+    ...ahorro,
+    horizontes: horizontesNormalizados,
+    ahorro_mensual_total,
+    fondo_emergencia_actual,
+    inversiones_largo_plazo_actuales
+  };
+};
 
 interface FinancialContextValue {
   perfil: PerfilFinanciero;
@@ -191,8 +216,6 @@ interface FinancialContextValue {
   removeGasto: (id: string) => void;
   upsertDeuda: (deuda: Deuda) => void;
   removeDeuda: (id: string) => void;
-  upsertMeta: (meta: Meta) => void;
-  removeMeta: (id: string) => void;
 }
 
 const FinancialContext = createContext<FinancialContextValue | undefined>(undefined);
@@ -242,21 +265,6 @@ export const FinancialProvider = ({ children }: { children: ReactNode }) => {
       setPerfil((prev) => ({
         ...prev,
         deudas: { lista_deudas: prev.deudas.lista_deudas.filter((d) => d.id !== id) }
-      }));
-    },
-    upsertMeta: (meta) => {
-      setPerfil((prev) => {
-        const exists = prev.metas.lista_metas.some((m) => m.id === meta.id);
-        const lista = exists
-          ? prev.metas.lista_metas.map((m) => (m.id === meta.id ? { ...m, ...meta } : m))
-          : [...prev.metas.lista_metas, meta];
-        return { ...prev, metas: { lista_metas: lista } };
-      });
-    },
-    removeMeta: (id) => {
-      setPerfil((prev) => ({
-        ...prev,
-        metas: { lista_metas: prev.metas.lista_metas.filter((m) => m.id !== id) }
       }));
     }
   }), [perfil]);
