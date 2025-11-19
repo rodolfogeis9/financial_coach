@@ -64,32 +64,42 @@ export const IncomeSection = () => {
                 }
               />
             </label>
-            <NumericInput
-              label="Edad"
-              value={usuario.edad || ''}
-              onChange={(e) =>
-                setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: Number(e.target.value) || 0 } }))
-              }
-              tooltip="Edad en años"
-              prefix=""
-            />
-            <NumericInput
-              label="Adultos en el hogar"
-              value={usuario.adultos || ''}
-              onChange={(e) =>
-                setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, adultos: Number(e.target.value) || 0 } }))
-              }
-              tooltip="Inclúyete a ti"
-              prefix=""
-            />
-            <NumericInput
-              label="Niños"
-              value={usuario.ninos || ''}
-              onChange={(e) =>
-                setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: Number(e.target.value) || 0 } }))
-              }
-              prefix=""
-            />
+            <label className="text-sm font-medium text-slate-700">
+              Edad
+              <input
+                type="number"
+                min={0}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                value={usuario.edad || ''}
+                onChange={(e) =>
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: Number(e.target.value) || 0 } }))
+                }
+              />
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              Adultos en el hogar
+              <input
+                type="number"
+                min={0}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                value={usuario.adultos || ''}
+                onChange={(e) =>
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, adultos: Number(e.target.value) || 0 } }))
+                }
+              />
+            </label>
+            <label className="text-sm font-medium text-slate-700">
+              Niños
+              <input
+                type="number"
+                min={0}
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                value={usuario.ninos || ''}
+                onChange={(e) =>
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: Number(e.target.value) || 0 } }))
+                }
+              />
+            </label>
             <label className="text-sm font-medium text-slate-700">
               Tipo de vivienda
               <select
@@ -115,14 +125,14 @@ export const IncomeSection = () => {
           <div className="grid gap-4 md:grid-cols-2">
             <NumericInput
               label="Sueldo neto"
-              value={ingreso.sueldo_neto || ''}
-              onChange={(e) => updateIngreso({ sueldo_neto: Number(e.target.value) || 0 })}
+              value={ingreso.sueldo_neto}
+              onValueChange={(value) => updateIngreso({ sueldo_neto: value })}
               tooltip="Ingreso líquido después de descuentos"
             />
             <NumericInput
               label="Bonos mensualizados"
-              value={ingreso.bonos_mensualizados || ''}
-              onChange={(e) => updateIngreso({ bonos_mensualizados: Number(e.target.value) || 0 })}
+              value={ingreso.bonos_mensualizados}
+              onValueChange={(value) => updateIngreso({ bonos_mensualizados: value })}
             />
           </div>
           <div className="mt-6 space-y-4">
@@ -158,8 +168,8 @@ export const IncomeSection = () => {
                   </label>
                   <NumericInput
                     label="Monto mensual"
-                    value={item.monto || ''}
-                    onChange={(e) => handleOtroChange(item.id, { monto: Number(e.target.value) || 0 })}
+                    value={item.monto}
+                    onValueChange={(value) => handleOtroChange(item.id, { monto: value })}
                   />
                   <button
                     type="button"

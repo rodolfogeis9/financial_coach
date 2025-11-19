@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '../common/Card';
 import { useFinancialProfile } from '../../hooks/useFinancialProfile';
 import { HorizonteInversion } from '../../types/financial';
+import { formatNumber } from '../../utils/numberFormat';
 
 const HORIZON_LABELS: Record<HorizonteInversion, { label: string; color: string; retorno: number }> = {
   corto: { label: 'Corto plazo', color: '#0ea5e9', retorno: 0.04 },
@@ -188,11 +189,11 @@ export const ProjectionSimulator = ({ embedded = false }: { embedded?: boolean }
                   return (
                     <tr key={key}>
                       <td className="py-3 font-semibold text-slate-700">{HORIZON_LABELS[key].label}</td>
-                      <td>${resumen.stockInicial.toFixed(0)}</td>
-                      <td>${resumen.aportesFuturos.toFixed(0)}</td>
-                      <td className="font-semibold text-slate-900">${resumen.final.toFixed(0)}</td>
+                      <td>${formatNumber(resumen.stockInicial)}</td>
+                      <td>${formatNumber(resumen.aportesFuturos)}</td>
+                      <td className="font-semibold text-slate-900">${formatNumber(resumen.final)}</td>
                       <td className={resumen.rentabilidad >= 0 ? 'text-emerald-600' : 'text-red-600'}>
-                        ${resumen.rentabilidad.toFixed(0)}
+                        ${formatNumber(resumen.rentabilidad)}
                       </td>
                     </tr>
                   );
@@ -202,9 +203,9 @@ export const ProjectionSimulator = ({ embedded = false }: { embedded?: boolean }
           </div>
           <p className="text-sm text-slate-600">
             Si mantienes tus aportes actuales durante {anos} años, podrías acumular ${
-              projections.resultado.largo.final.toFixed(0)
-            } en el horizonte de largo plazo, donde ${projections.resultado.largo.aportesFuturos.toFixed(0)} provienen de tus aportes y ${
-              projections.resultado.largo.rentabilidad.toFixed(0)
+              formatNumber(projections.resultado.largo.final)
+            } en el horizonte de largo plazo, donde ${formatNumber(projections.resultado.largo.aportesFuturos)} provienen de tus aportes y ${
+              formatNumber(projections.resultado.largo.rentabilidad)
             } de la rentabilidad compuesta.
           </p>
         </div>

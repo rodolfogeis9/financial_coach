@@ -86,7 +86,7 @@ export const VariableExpensesSection = () => {
   };
 
   const addOtroGasto = () => {
-    if (!nuevoNombre || nuevoMonto <= 0) return;
+    if (!nuevoNombre) return;
     const gasto: Gasto = {
       id: `otro-${uuidv4()}`,
       nombre: nuevoNombre,
@@ -113,16 +113,16 @@ export const VariableExpensesSection = () => {
             <div className="grid gap-4 md:grid-cols-2">
               {block.items.map((id) => {
                 const gasto = getGasto(id);
-              if (!gasto) return null;
-              return (
-                <NumericInput
-                  key={id}
-                  label={gasto.nombre}
-                  value={gasto.monto_mensual || ''}
-                  onChange={(e) => updateAmount(gasto, Number(e.target.value) || 0)}
-                />
-              );
-            })}
+                if (!gasto) return null;
+                return (
+                  <NumericInput
+                    key={id}
+                    label={gasto.nombre}
+                    value={gasto.monto_mensual}
+                    onValueChange={(value) => updateAmount(gasto, value)}
+                  />
+                );
+              })}
               {block.id === 'hijos' && (
                 <div className="md:col-span-2 space-y-3">
                   {hijosExtras.length === 0 && <p className="text-sm text-slate-500">Agrega otras actividades, materiales o salidas asociadas a tus hijos.</p>}
@@ -138,8 +138,8 @@ export const VariableExpensesSection = () => {
                       </label>
                       <NumericInput
                         label="Monto mensual"
-                        value={gasto.monto_mensual || ''}
-                        onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                        value={gasto.monto_mensual}
+                        onValueChange={(value) => upsertGasto({ ...gasto, monto_mensual: value })}
                       />
                       <button className="self-end text-xs font-semibold text-red-500" onClick={() => removeGasto(gasto.id)}>
                         Eliminar
@@ -170,8 +170,8 @@ export const VariableExpensesSection = () => {
                       </label>
                       <NumericInput
                         label="Monto mensual"
-                        value={gasto.monto_mensual || ''}
-                        onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                        value={gasto.monto_mensual}
+                        onValueChange={(value) => upsertGasto({ ...gasto, monto_mensual: value })}
                       />
                       <button className="self-end text-xs font-semibold text-red-500" onClick={() => removeGasto(gasto.id)}>
                         Eliminar
@@ -197,8 +197,8 @@ export const VariableExpensesSection = () => {
               <div key={gasto.id} className="flex items-center gap-3">
                 <NumericInput
                   label={gasto.nombre}
-                  value={gasto.monto_mensual || ''}
-                  onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                  value={gasto.monto_mensual}
+                  onValueChange={(value) => upsertGasto({ ...gasto, monto_mensual: value })}
                   className="flex-1"
                 />
                 <button className="text-xs text-red-500" onClick={() => removeGasto(gasto.id)}>
@@ -215,7 +215,7 @@ export const VariableExpensesSection = () => {
                   onChange={(e) => setNuevoNombre(e.target.value)}
                 />
               </label>
-              <NumericInput label="Monto" value={nuevoMonto || ''} onChange={(e) => setNuevoMonto(Number(e.target.value) || 0)} />
+              <NumericInput label="Monto" value={nuevoMonto} onValueChange={(value) => setNuevoMonto(value)} />
               <label className="text-sm font-medium text-slate-700">
                 Categoría
                 <select

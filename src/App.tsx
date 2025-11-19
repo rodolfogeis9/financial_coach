@@ -12,6 +12,7 @@ import { SimulatorSection } from './sections/SimulatorSection';
 import { useFinancialProfile } from './hooks/useFinancialProfile';
 import { SeccionClave } from './types/financial';
 import { calcularTotales } from './utils/financialLogic';
+import { BudgetBanner } from './components/layout/BudgetBanner';
 
 const sectionLabels: Record<SeccionClave, string> = {
   inicio: 'Inicio',
@@ -23,6 +24,35 @@ const sectionLabels: Record<SeccionClave, string> = {
   resultado: 'Resultado y salud financiera',
   simulador: 'Simulador'
 };
+
+const overlayPattern = encodeURIComponent(`
+  <svg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'>
+    <rect width='600' height='600' fill='none'/>
+    <g stroke='%230ea5e9' stroke-opacity='0.15' stroke-width='1.5' fill='none'>
+      <path d='M40 520 L140 360 L220 410 L320 250 L420 300 L520 180'/>
+    </g>
+    <g stroke='%23f97316' stroke-opacity='0.15' stroke-width='2' fill='none'>
+      <path d='M60 440 C140 360 260 460 340 360 420 280 520 360 560 320'/>
+    </g>
+    <g fill='%23ffffff' fill-opacity='0.08' font-family='Inter,Arial,sans-serif' font-size='72'>
+      <text x='420' y='140'>$</text>
+      <text x='80' y='260'>₿</text>
+      <text x='300' y='500'>₿</text>
+      <text x='200' y='160'>₱</text>
+    </g>
+    <g stroke='%23facc15' stroke-opacity='0.2' stroke-width='12' stroke-linecap='round'>
+      <path d='M120 520 L120 380' />
+      <path d='M200 520 L200 320' />
+      <path d='M280 520 L280 400' />
+      <path d='M360 520 L360 300' />
+      <path d='M440 520 L440 420' />
+    </g>
+    <g fill='%23a855f7' fill-opacity='0.15'>
+      <circle cx='520' cy='80' r='30' />
+      <circle cx='90' cy='460' r='24' />
+    </g>
+  </svg>
+`);
 
 export default function App() {
   const { perfil } = useFinancialProfile();
@@ -76,32 +106,47 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100">
-      <Header />
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row">
-        <Sidebar
-          sections={sectionsOrder.map((key) => ({
-            key,
-            label: sectionLabels[key],
-            complete: completion[key],
-            disabled: key === 'resultado' ? !hasIncome : key === 'simulador' ? !hasIncome : false
-          }))}
-          current={currentSection}
-          onSelect={(key) => {
-            if ((key === 'resultado' || key === 'simulador') && !hasIncome) return;
-            setCurrentSection(key);
-          }}
-        />
-        <main className="flex-1 space-y-6">{renderSection()}</main>
-      </div>
-      {hasIncome && !totales.valido && currentSection === 'resultado' && (
-        <div className="mx-auto max-w-4xl px-4 pb-10">
-          <p className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm text-red-600">
-            Para ver tu resultado necesitas ingresar tu ingreso mensual total y asignar el 100 % entre gastos y ahorro
-            (tolerancia ±1 %).
-          </p>
+    <div className="relative min-h-screen overflow-hidden">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-90"
+        style={{
+          backgroundImage: `radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.25), transparent 55%), radial-gradient(circle at 85% 10%, rgba(249, 115, 22, 0.2), transparent 55%), url("data:image/svg+xml,${overlayPattern}")`,
+          backgroundSize: '1200px 1200px, 900px 900px, 480px 480px',
+          backgroundRepeat: 'no-repeat, no-repeat, repeat'
+        }}
+      ></div>
+      <div className="relative z-10 flex min-h-screen flex-col bg-gradient-to-b from-white/95 via-white/90 to-white/95 bg-opacity-90">
+        <Header />
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 lg:flex-row">
+          <Sidebar
+            sections={sectionsOrder.map((key) => ({
+              key,
+              label: sectionLabels[key],
+              complete: completion[key],
+              disabled: key === 'resultado' ? !hasIncome : key === 'simulador' ? !hasIncome : false
+            }))}
+            current={currentSection}
+            onSelect={(key) => {
+              if ((key === 'resultado' || key === 'simulador') && !hasIncome) return;
+              setCurrentSection(key);
+            }}
+          />
+          <main className="flex-1 space-y-6">
+            {currentSection !== 'inicio' && (
+              <BudgetBanner income={totales.ingreso} assigned={totales.total_gasto_ahorro} />
+            )}
+            {renderSection()}
+          </main>
         </div>
-      )}
+        {hasIncome && !totales.valido && currentSection === 'resultado' && (
+          <div className="mx-auto max-w-4xl px-4 pb-10">
+            <p className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm text-red-600">
+              Para ver tu resultado necesitas ingresar tu ingreso mensual total y asignar el 100 % entre gastos y ahorro
+              (tolerancia ±1 %).
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
