@@ -4,6 +4,7 @@ import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { CategoriaGasto, Gasto, TipoAgrupador } from '../types/financial';
 import { ProgressSummary } from '../components/common/ProgressSummary';
 import { v4 as uuidv4 } from 'uuid';
+import { formatCurrency } from '../utils/numberFormat';
 
 interface FixedBlock {
   id: string;
@@ -68,7 +69,7 @@ export const FixedExpensesSection = () => {
   const totalFijos = blocks.reduce((sum, block) => sum + blockSubtotal(block), 0);
   const summaryDetails = blocks.map((block) => ({
     label: block.title,
-    value: `$${blockSubtotal(block).toLocaleString('es-CL')}`
+    value: formatCurrency(blockSubtotal(block))
   }));
 
   const addTransporteExtra = () => {
@@ -89,7 +90,11 @@ export const FixedExpensesSection = () => {
           <Card
             key={block.title}
             title={block.title}
-            actions={<span className="text-sm font-semibold text-slate-500">Subtotal: ${blockSubtotal(block).toLocaleString('es-CL')}</span>}
+            actions={
+              <span className="text-sm font-semibold text-slate-500">
+                Subtotal: {formatCurrency(blockSubtotal(block))}
+              </span>
+            }
           >
             <p className="text-sm text-slate-500">{block.description}</p>
             <div className="grid gap-4 md:grid-cols-2">

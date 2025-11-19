@@ -5,6 +5,7 @@ import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { CategoriaGasto, Gasto, TipoAgrupador } from '../types/financial';
 import { v4 as uuidv4 } from 'uuid';
 import { ProgressSummary } from '../components/common/ProgressSummary';
+import { formatCurrency } from '../utils/numberFormat';
 
 const variableBlocks = [
   { id: 'alimentacion', title: 'Alimentación', description: 'Supermercado, feria, carnes y delivery.', items: ['supermercado', 'verduleria', 'carnes', 'delivery'] },
@@ -64,11 +65,11 @@ export const VariableExpensesSection = () => {
   const summaryDetails = [
     ...variableBlocks.map((block) => ({
       label: block.title,
-      value: `$${blockSubtotal(block.id, block.items).toLocaleString('es-CL')}`
+      value: formatCurrency(blockSubtotal(block.id, block.items))
     })),
     {
       label: 'Otros flexibles',
-      value: `$${totalOtros.toLocaleString('es-CL')}`
+      value: formatCurrency(totalOtros)
     }
   ];
 
@@ -107,7 +108,11 @@ export const VariableExpensesSection = () => {
           <Card
             key={block.title}
             title={block.title}
-            actions={<span className="text-sm font-semibold text-slate-500">Subtotal: ${blockSubtotal(block.id, block.items).toLocaleString('es-CL')}</span>}
+            actions={
+              <span className="text-sm font-semibold text-slate-500">
+                Subtotal: {formatCurrency(blockSubtotal(block.id, block.items))}
+              </span>
+            }
           >
             <p className="text-sm text-slate-500">{block.description}</p>
             <div className="grid gap-4 md:grid-cols-2">
@@ -190,7 +195,10 @@ export const VariableExpensesSection = () => {
           </div>
         </Card>
       ))}
-        <Card title="Otros gastos variables" actions={<span className="text-sm font-semibold text-slate-500">Subtotal: ${totalOtros.toLocaleString('es-CL')}</span>}>
+        <Card
+          title="Otros gastos variables"
+          actions={<span className="text-sm font-semibold text-slate-500">Subtotal: {formatCurrency(totalOtros)}</span>}
+        >
           <div className="space-y-4">
             {otrosGastos.length === 0 && <p className="text-sm text-slate-500">Agrega tus otros gastos flexibles.</p>}
             {otrosGastos.map((gasto) => (
