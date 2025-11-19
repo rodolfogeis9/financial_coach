@@ -12,8 +12,8 @@ export const BudgetBanner = ({ income, assigned }: BudgetBannerProps) => {
 
   let title = 'Asigna tu sueldo mensual';
   let subtitle = 'Ingresa tu sueldo neto para comenzar a distribuir tu dinero.';
-  let accent = 'text-white';
-  let badge = 'bg-white/20 text-white';
+  let accent = 'text-sky-900';
+  let badge = 'bg-white/80 text-sky-800 ring-1 ring-white/60';
 
   if (hasIncome && difference > 0) {
     title = 'Aún tienes dinero disponible';
@@ -24,13 +24,13 @@ export const BudgetBanner = ({ income, assigned }: BudgetBannerProps) => {
   } else if (hasIncome && difference === 0) {
     title = '¡Perfecto!';
     subtitle = 'Asignaste el 100 % de tu ingreso mensual entre gastos e inversiones.';
-    accent = 'text-emerald-50';
-    badge = 'bg-emerald-400/20 text-emerald-50';
+    accent = 'text-emerald-700';
+    badge = 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100';
   }
 
   return (
-    <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-600 p-[1px] shadow-2xl">
-      <div className="flex flex-col gap-6 rounded-[calc(1.5rem-1px)] bg-white/90 p-6 text-slate-900 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-3xl bg-gradient-to-r from-sky-500 via-sky-400 to-blue-700 p-[1px] shadow-2xl">
+      <div className="flex flex-col gap-6 rounded-[calc(1.5rem-1px)] bg-white/95 p-6 text-slate-900 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
           <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${badge}`}>
             Controla tu sueldo
