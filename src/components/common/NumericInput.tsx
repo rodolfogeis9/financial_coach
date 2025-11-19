@@ -21,21 +21,19 @@ export const NumericInput = ({
   onValueChange,
   ...props
 }: NumericInputProps) => {
-  const [displayValue, setDisplayValue] = useState(() => (value ? formatNumber(value) : ''));
+  const getFormattedValue = (val?: number | null) => {
+    if (val === undefined || val === null || Number.isNaN(val)) {
+      return '';
+    }
+    return formatNumber(val);
+  };
+
+  const [displayValue, setDisplayValue] = useState(() => getFormattedValue(value));
 
   useEffect(() => {
-    if ((value === 0 || value === undefined || value === null) && displayValue === '') {
-      return;
-    }
-    if (value === undefined || value === null) {
-      setDisplayValue('');
-      return;
-    }
-    const formatted = formatNumber(value);
-    if (formatted !== displayValue) {
-      setDisplayValue(formatted);
-    }
-  }, [value, displayValue]);
+    const formatted = getFormattedValue(value);
+    setDisplayValue((current) => (current !== formatted ? formatted : current));
+  }, [value]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = event.target.value;
@@ -67,7 +65,7 @@ export const NumericInput = ({
         <input
           type="text"
           inputMode="numeric"
-          pattern="[0-9]*"
+          pattern="[0-9\.]*"
           value={displayValue}
           onChange={handleChange}
           className={clsx(
