@@ -70,7 +70,7 @@ export const IncomeSection = () => {
                 type="number"
                 min={0}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.edad || ''}
+                value={usuario.edad}
                 onChange={(e) =>
                   setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: Number(e.target.value) || 0 } }))
                 }
@@ -82,7 +82,7 @@ export const IncomeSection = () => {
                 type="number"
                 min={0}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.adultos || ''}
+                value={usuario.adultos}
                 onChange={(e) =>
                   setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, adultos: Number(e.target.value) || 0 } }))
                 }
@@ -94,7 +94,7 @@ export const IncomeSection = () => {
                 type="number"
                 min={0}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.ninos || ''}
+                value={usuario.ninos}
                 onChange={(e) =>
                   setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: Number(e.target.value) || 0 } }))
                 }
