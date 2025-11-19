@@ -2,7 +2,7 @@ import { Card } from '../components/common/Card';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { construirDiagnostico, DISTRIBUCION_IDEAL, Totales } from '../utils/financialLogic';
 import { ProjectionSimulator } from '../components/simulator/ProjectionSimulator';
-import { formatNumber } from '../utils/numberFormat';
+import { formatCurrency, formatNumber } from '../utils/numberFormat';
 
 const gradeColor = (nota: number) => {
   if (nota < 40) return 'bg-red-100 text-red-700';
@@ -233,9 +233,9 @@ const BalanceCard = ({ totales, error }: { totales: Totales; error?: string }) =
   } else if (totales.ingreso <= 0) {
     message = 'Ingresa tu ingreso mensual para obtener tu diagnóstico.';
   } else if (deficit) {
-    message = `Tus gastos + inversiones superan tus ingresos en $${Math.abs(totales.diferencia).toLocaleString('es-CL')}.`;
+    message = `Tus gastos + inversiones superan tus ingresos en ${formatCurrency(Math.abs(totales.diferencia))}.`;
   } else if (sinAsignar) {
-    message = `Aún tienes $${totales.diferencia.toLocaleString('es-CL')} sin asignar. Decide si serán ahorro o gastos.`;
+    message = `Aún tienes ${formatCurrency(totales.diferencia)} sin asignar. Decide si serán ahorro o gastos.`;
   } else {
     message = '¡Perfecto! Estás asignando el 100 % de tu ingreso mensual.';
   }
@@ -254,8 +254,8 @@ const BalanceCard = ({ totales, error }: { totales: Totales; error?: string }) =
       <div className="space-y-2">
         <p className="text-sm text-slate-500">Ingreso vs. dinero asignado</p>
         <div className="flex flex-wrap gap-6 text-2xl font-bold text-slate-900">
-          <span>Ingreso: ${totales.ingreso.toLocaleString('es-CL')}</span>
-          <span>Asignado: ${totales.total_gasto_ahorro.toLocaleString('es-CL')}</span>
+          <span>Ingreso: {formatCurrency(totales.ingreso)}</span>
+          <span>Asignado: {formatCurrency(totales.total_gasto_ahorro)}</span>
         </div>
         <p className={`text-sm font-semibold ${deficit ? 'text-red-600' : sinAsignar ? 'text-amber-600' : 'text-emerald-600'}`}>
           {message}
@@ -265,7 +265,7 @@ const BalanceCard = ({ totales, error }: { totales: Totales; error?: string }) =
         {breakdown.map((item) => (
           <li key={item.label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 text-sm">
             <span className="text-slate-500">{item.label}</span>
-            <span className="font-semibold text-slate-900">${item.value.toLocaleString('es-CL')}</span>
+            <span className="font-semibold text-slate-900">{formatCurrency(item.value)}</span>
           </li>
         ))}
       </ul>

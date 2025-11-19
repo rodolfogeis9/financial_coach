@@ -3,6 +3,7 @@ import { Card } from '../components/common/Card';
 import { TipoVivienda, TipoOtroIngreso } from '../types/financial';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { v4 as uuidv4 } from 'uuid';
+import { formatCurrency } from '../utils/numberFormat';
 
 const viviendaOptions = [
   { label: 'Propia con hipoteca', value: TipoVivienda.PROPIA_HIPOTECA },
@@ -182,7 +183,7 @@ export const IncomeSection = () => {
               ))}
             </div>
             <p className="text-sm text-slate-600">
-              Total otros ingresos: ${totalOtros.toLocaleString('es-CL')} (se suma automáticamente al ingreso mensual).
+              Total otros ingresos: {formatCurrency(totalOtros)} (se suma automáticamente al ingreso mensual).
             </p>
           </div>
           <p className="mt-4 text-sm text-slate-600">
@@ -192,7 +193,7 @@ export const IncomeSection = () => {
       </div>
       <Card title="Resumen de ingreso" className="h-fit">
         <p className="text-sm text-slate-500">Ingreso mensual total</p>
-        <p className="text-4xl font-bold text-slate-900">${ingreso.ingreso_total.toLocaleString('es-CL')}</p>
+        <p className="text-4xl font-bold text-slate-900">{formatCurrency(ingreso.ingreso_total)}</p>
         {ingreso.ingreso_total <= 0 && (
           <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
             Debes ingresar al menos un ingreso mensual para avanzar.

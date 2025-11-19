@@ -4,6 +4,7 @@ import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { ProgressSummary } from '../components/common/ProgressSummary';
 import { HorizonteDetalle, HorizonteInversion, InstrumentoFinanciero } from '../types/financial';
 import { v4 as uuidv4 } from 'uuid';
+import { formatCurrency } from '../utils/numberFormat';
 
 const horizonConfig: Record<HorizonteInversion, { label: string; description: string; tasa: number }> = {
   corto: { label: 'Corto plazo', description: 'Objetivos de 0 a 12 meses (colchón, vacaciones, etc.).', tasa: 0.04 },
@@ -30,7 +31,7 @@ export const SavingsSection = () => {
   const ahorroMensualTotal = ahorro.ahorro_mensual_total;
   const summaryDetails = (Object.keys(horizonConfig) as HorizonteInversion[]).map((key) => ({
     label: horizonConfig[key].label,
-    value: `$${horizontes[key].monto_mensual.toLocaleString('es-CL')}`
+    value: formatCurrency(horizontes[key].monto_mensual)
   }));
 
   const updateHorizonte = (key: HorizonteInversion, updates: Partial<HorizonteDetalle>) => {

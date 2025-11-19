@@ -4,6 +4,7 @@ import { NumericInput } from '../components/common/NumericInput';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { Deuda, TipoAgrupador, TipoDeuda } from '../types/financial';
 import { ProgressSummary } from '../components/common/ProgressSummary';
+import { formatCurrency } from '../utils/numberFormat';
 
 const deudaLabels: Record<TipoDeuda, string> = {
   [TipoDeuda.CONSUMO]: 'Consumo',
@@ -43,8 +44,8 @@ export const DebtSection = () => {
   const totalBuena = totalPorTipo(TipoAgrupador.DB);
   const totalDeuda = totalConsumo + totalBuena;
   const summaryDetails = [
-    { label: 'Consumo (DM)', value: `$${totalConsumo.toLocaleString('es-CL')}` },
-    { label: 'Deuda buena (DB)', value: `$${totalBuena.toLocaleString('es-CL')}` }
+    { label: 'Consumo (DM)', value: formatCurrency(totalConsumo) },
+    { label: 'Deuda buena (DB)', value: formatCurrency(totalBuena) }
   ];
 
   return (
@@ -127,10 +128,10 @@ export const DebtSection = () => {
         </Card>
         <div className="grid gap-4 md:grid-cols-2">
           <Card title="Total deuda de consumo">
-            <p className="text-3xl font-bold text-slate-900">${totalConsumo.toLocaleString('es-CL')}</p>
+            <p className="text-3xl font-bold text-slate-900">{formatCurrency(totalConsumo)}</p>
           </Card>
           <Card title="Total deuda buena">
-            <p className="text-3xl font-bold text-slate-900">${totalBuena.toLocaleString('es-CL')}</p>
+            <p className="text-3xl font-bold text-slate-900">{formatCurrency(totalBuena)}</p>
           </Card>
         </div>
       </div>
