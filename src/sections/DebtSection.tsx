@@ -90,16 +90,16 @@ export const DebtSection = () => {
                 <td className="py-3">
                   <NumericInput
                     label=""
-                    value={deuda.cuota_mensual || ''}
-                    onChange={(e) => upsertDeuda({ ...deuda, cuota_mensual: Number(e.target.value) || 0 })}
+                    value={deuda.cuota_mensual}
+                    onValueChange={(value) => upsertDeuda({ ...deuda, cuota_mensual: value })}
                     className="min-w-[150px]"
                   />
                 </td>
                 <td className="py-3">
                   <NumericInput
                     label=""
-                    value={deuda.saldo_total || ''}
-                    onChange={(e) => upsertDeuda({ ...deuda, saldo_total: Number(e.target.value) || 0 })}
+                    value={deuda.saldo_total}
+                    onValueChange={(value) => upsertDeuda({ ...deuda, saldo_total: value })}
                     className="min-w-[150px]"
                   />
                 </td>

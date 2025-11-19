@@ -95,8 +95,8 @@ export const SavingsSection = () => {
                   <div className="mt-3 grid gap-4 md:grid-cols-2">
                     <NumericInput
                       label="Ahorro mensual"
-                      value={data.monto_mensual || ''}
-                      onChange={(e) => updateHorizonte(key, { monto_mensual: Number(e.target.value) || 0 })}
+                      value={data.monto_mensual}
+                      onValueChange={(value) => updateHorizonte(key, { monto_mensual: value })}
                     />
                     <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
                       Tasa de referencia anual: {(horizonConfig[key].tasa * 100).toFixed(1)} %
@@ -134,8 +134,10 @@ export const SavingsSection = () => {
                         </label>
                         <NumericInput
                           label="Monto mensual"
-                          value={inst.monto || ''}
-                          onChange={(e) => handleInstrumentChange(key, 'instrumentos_mensuales', inst.id, { monto: Number(e.target.value) || 0 })}
+                          value={inst.monto}
+                          onValueChange={(value) =>
+                            handleInstrumentChange(key, 'instrumentos_mensuales', inst.id, { monto: value })
+                          }
                         />
                         <button
                           type="button"
@@ -168,8 +170,8 @@ export const SavingsSection = () => {
                   <div className="mt-3 grid gap-4 md:grid-cols-2">
                     <NumericInput
                       label="Stock actual"
-                      value={data.stock_actual || ''}
-                      onChange={(e) => updateHorizonte(key, { stock_actual: Number(e.target.value) || 0 })}
+                      value={data.stock_actual}
+                      onValueChange={(value) => updateHorizonte(key, { stock_actual: value })}
                     />
                     <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
                       Este monto alimenta el simulador de proyección.
@@ -207,8 +209,10 @@ export const SavingsSection = () => {
                         </label>
                         <NumericInput
                           label="Monto actual"
-                          value={inst.monto || ''}
-                          onChange={(e) => handleInstrumentChange(key, 'instrumentos_stock', inst.id, { monto: Number(e.target.value) || 0 })}
+                          value={inst.monto}
+                          onValueChange={(value) =>
+                            handleInstrumentChange(key, 'instrumentos_stock', inst.id, { monto: value })
+                          }
                         />
                         <button
                           type="button"

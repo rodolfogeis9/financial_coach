@@ -100,8 +100,8 @@ export const FixedExpensesSection = () => {
                   <NumericInput
                     key={id}
                     label={gasto.nombre}
-                    value={gasto.monto_mensual || ''}
-                    onChange={(e) => updateAmount(gasto, Number(e.target.value) || 0)}
+                    value={gasto.monto_mensual}
+                    onValueChange={(value) => updateAmount(gasto, value)}
                     tooltip="Monto mensual"
                   />
                 );
@@ -123,8 +123,8 @@ export const FixedExpensesSection = () => {
                       </label>
                       <NumericInput
                         label="Monto mensual"
-                        value={gasto.monto_mensual || ''}
-                        onChange={(e) => upsertGasto({ ...gasto, monto_mensual: Number(e.target.value) || 0 })}
+                        value={gasto.monto_mensual}
+                        onValueChange={(value) => upsertGasto({ ...gasto, monto_mensual: value })}
                       />
                       <button
                         type="button"

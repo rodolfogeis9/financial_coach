@@ -2,6 +2,7 @@ import { Card } from '../components/common/Card';
 import { useFinancialProfile } from '../hooks/useFinancialProfile';
 import { construirDiagnostico, DISTRIBUCION_IDEAL, Totales } from '../utils/financialLogic';
 import { ProjectionSimulator } from '../components/simulator/ProjectionSimulator';
+import { formatNumber } from '../utils/numberFormat';
 
 const gradeColor = (nota: number) => {
   if (nota < 40) return 'bg-red-100 text-red-700';
@@ -52,7 +53,9 @@ export const ResultsSection = () => {
       texto:
         ratios.ra >= 0.15
           ? 'Estás dentro del rango recomendado.'
-          : `Te falta ${(Math.max(0, 0.15 - ratios.ra) * 100).toFixed(1)} % (${(Math.max(0, 0.15 - ratios.ra) * totales.ingreso).toFixed(0)}) para llegar al mínimo saludable.`
+          : `Te falta ${(Math.max(0, 0.15 - ratios.ra) * 100).toFixed(1)} % ($${formatNumber(
+              Math.max(0, 0.15 - ratios.ra) * totales.ingreso
+            )}) para llegar al mínimo saludable.`
     },
     {
       label: 'Deuda mala',
@@ -61,7 +64,9 @@ export const ResultsSection = () => {
       texto:
         ratios.p_DM <= 0.1
           ? 'Tus cuotas de consumo están controladas.'
-          : `Reduce ${(Math.max(0, ratios.p_DM - 0.1) * 100).toFixed(1)} % (${(Math.max(0, ratios.p_DM - 0.1) * totales.ingreso).toFixed(0)}) para estar en rango.`
+          : `Reduce ${(Math.max(0, ratios.p_DM - 0.1) * 100).toFixed(1)} % ($${formatNumber(
+              Math.max(0, ratios.p_DM - 0.1) * totales.ingreso
+            )}) para estar en rango.`
     },
     {
       label: 'Necesidades vitales',
@@ -70,7 +75,9 @@ export const ResultsSection = () => {
       texto:
         ratios.p_NV <= 0.6
           ? 'Buen equilibrio de gastos básicos.'
-          : `Recorta ${(Math.max(0, ratios.p_NV - 0.6) * 100).toFixed(1)} % (${(Math.max(0, ratios.p_NV - 0.6) * totales.ingreso).toFixed(0)}) para volver al rango.`
+          : `Recorta ${(Math.max(0, ratios.p_NV - 0.6) * 100).toFixed(1)} % ($${formatNumber(
+              Math.max(0, ratios.p_NV - 0.6) * totales.ingreso
+            )}) para volver al rango.`
     },
     {
       label: 'Estilo de vida',
@@ -79,7 +86,9 @@ export const ResultsSection = () => {
       texto:
         ratios.p_EV <= 0.2
           ? 'Estás destinando una porción sana a ocio.'
-          : `Reduce ${(Math.max(0, ratios.p_EV - 0.2) * 100).toFixed(1)} % (${(Math.max(0, ratios.p_EV - 0.2) * totales.ingreso).toFixed(0)}) para liberar espacio.`
+          : `Reduce ${(Math.max(0, ratios.p_EV - 0.2) * 100).toFixed(1)} % ($${formatNumber(
+              Math.max(0, ratios.p_EV - 0.2) * totales.ingreso
+            )}) para liberar espacio.`
     },
     {
       label: 'Fondo de emergencia',
@@ -88,7 +97,9 @@ export const ResultsSection = () => {
       texto:
         ratios.meses_fondo_emergencia >= ratios.meses_objetivo
           ? 'Ya alcanzaste el objetivo.'
-          : `Te faltan ${(ratios.meses_objetivo - ratios.meses_fondo_emergencia).toFixed(1)} meses (${ratios.gap_fondo_emergencia.toFixed(0)}).`
+          : `Te faltan ${(ratios.meses_objetivo - ratios.meses_fondo_emergencia).toFixed(1)} meses ($${formatNumber(
+              ratios.gap_fondo_emergencia
+            )}).`
     }
   ];
 
