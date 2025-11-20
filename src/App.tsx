@@ -98,6 +98,7 @@ export default function App() {
   const currentIndex = sectionsOrder.indexOf(currentSection);
   const previousSection = currentIndex > 0 ? sectionsOrder[currentIndex - 1] : null;
   const nextSection = currentIndex >= 0 && currentIndex < sectionsOrder.length - 1 ? sectionsOrder[currentIndex + 1] : null;
+  const nextDisabled = !nextSection || !canAccessSection(nextSection);
 
   const handleSelectSection = (key: SeccionClave) => {
     if (!canAccessSection(key)) return;
@@ -144,7 +145,15 @@ export default function App() {
       <div className="relative z-10 flex min-h-screen flex-col bg-gradient-to-b from-white/95 via-white/90 to-white/95 bg-opacity-90">
         <Header />
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 lg:flex-row">
-          <Sidebar sections={navSections} current={currentSection} onSelect={handleSelectSection} />
+          <Sidebar
+            sections={navSections}
+            current={currentSection}
+            onSelect={handleSelectSection}
+            onNext={nextSection ? () => handleSelectSection(nextSection) : undefined}
+            nextSectionLabel={nextSection ? sectionLabels[nextSection] : undefined}
+            nextDisabled={nextDisabled}
+            nextDisabledReason={nextDisabledReason}
+          />
           <main className="flex-1 space-y-6">
             {currentSection !== 'inicio' && (
               <BudgetBanner income={totales.ingreso} assigned={totales.total_gasto_ahorro} />
