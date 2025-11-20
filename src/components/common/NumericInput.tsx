@@ -17,7 +17,7 @@ export const NumericInput = ({
   error,
   className,
   prefix = '$',
-  value = 0,
+  value,
   onValueChange,
   ...props
 }: NumericInputProps) => {
@@ -32,7 +32,10 @@ export const NumericInput = ({
 
   useEffect(() => {
     const formatted = getFormattedValue(value);
-    setDisplayValue((current) => (current !== formatted ? formatted : current));
+    setDisplayValue((current) => {
+      if (formatted === '0' && current === '') return current;
+      return current !== formatted ? formatted : current;
+    });
   }, [value]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +47,7 @@ export const NumericInput = ({
     }
     const numericValue = parseNumericString(rawValue);
     const formatted = numericValue === 0 ? '0' : formatNumber(numericValue);
-    setDisplayValue(formatted);
+    setDisplayValue(formatted === '0' && rawValue.trim() === '' ? '' : formatted);
     onValueChange?.(numericValue);
   };
 

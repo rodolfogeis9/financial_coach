@@ -31,5 +31,6 @@ export const parseNumericString = (value: string) => {
   if (cleaned === '') {
     return 0;
   }
-  return Number(cleaned);
+  const normalized = cleaned.replace(/^0+(?=\d)/, '');
+  return Number(normalized || '0');
 };

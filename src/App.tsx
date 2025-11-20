@@ -13,6 +13,7 @@ import { useFinancialProfile } from './hooks/useFinancialProfile';
 import { SeccionClave } from './types/financial';
 import { calcularTotales } from './utils/financialLogic';
 import { BudgetBanner } from './components/layout/BudgetBanner';
+import { SectionNavigator } from './components/layout/SectionNavigator';
 
 const sectionLabels: Record<SeccionClave, string> = {
   inicio: 'Inicio',
@@ -82,6 +83,31 @@ export default function App() {
     'simulador'
   ];
 
+  const canAccessSection = (section: SeccionClave) => {
+    if ((section === 'resultado' || section === 'simulador') && !hasIncome) return false;
+    return true;
+  };
+
+  const navSections = sectionsOrder.map((key) => ({
+    key,
+    label: sectionLabels[key],
+    complete: completion[key],
+    disabled: !canAccessSection(key)
+  }));
+
+  const currentIndex = sectionsOrder.indexOf(currentSection);
+  const previousSection = currentIndex > 0 ? sectionsOrder[currentIndex - 1] : null;
+  const nextSection = currentIndex >= 0 && currentIndex < sectionsOrder.length - 1 ? sectionsOrder[currentIndex + 1] : null;
+
+  const handleSelectSection = (key: SeccionClave) => {
+    if (!canAccessSection(key)) return;
+    setCurrentSection(key);
+  };
+
+  const nextDisabledReason = !hasIncome && nextSection && (nextSection === 'resultado' || nextSection === 'simulador')
+    ? 'Debes ingresar tu ingreso mensual total para avanzar a esta sección.'
+    : undefined;
+
   const renderSection = () => {
     switch (currentSection) {
       case 'inicio':
@@ -118,24 +144,20 @@ export default function App() {
       <div className="relative z-10 flex min-h-screen flex-col bg-gradient-to-b from-white/95 via-white/90 to-white/95 bg-opacity-90">
         <Header />
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 lg:flex-row">
-          <Sidebar
-            sections={sectionsOrder.map((key) => ({
-              key,
-              label: sectionLabels[key],
-              complete: completion[key],
-              disabled: key === 'resultado' ? !hasIncome : key === 'simulador' ? !hasIncome : false
-            }))}
-            current={currentSection}
-            onSelect={(key) => {
-              if ((key === 'resultado' || key === 'simulador') && !hasIncome) return;
-              setCurrentSection(key);
-            }}
-          />
+          <Sidebar sections={navSections} current={currentSection} onSelect={handleSelectSection} />
           <main className="flex-1 space-y-6">
             {currentSection !== 'inicio' && (
               <BudgetBanner income={totales.ingreso} assigned={totales.total_gasto_ahorro} />
             )}
             {renderSection()}
+            {currentSection !== 'inicio' && (
+              <SectionNavigator
+                sections={navSections}
+                current={currentSection}
+                onSelect={handleSelectSection}
+                nextDisabledReason={nextDisabledReason}
+              />
+            )}
           </main>
         </div>
         {hasIncome && !totales.valido && currentSection === 'resultado' && (
