@@ -13,9 +13,21 @@ interface SidebarProps {
   sections: NavSection[];
   current: SeccionClave;
   onSelect: (key: SeccionClave) => void;
+  onNext?: () => void;
+  nextSectionLabel?: string;
+  nextDisabled?: boolean;
+  nextDisabledReason?: string;
 }
 
-export const Sidebar = ({ sections, current, onSelect }: SidebarProps) => (
+export const Sidebar = ({
+  sections,
+  current,
+  onSelect,
+  onNext,
+  nextSectionLabel,
+  nextDisabled,
+  nextDisabledReason
+}: SidebarProps) => (
   <>
     <aside className="hidden w-full max-w-xs border-r border-slate-200 bg-white/80 px-4 py-6 backdrop-blur lg:block">
       <nav className="space-y-1">
@@ -37,6 +49,27 @@ export const Sidebar = ({ sections, current, onSelect }: SidebarProps) => (
           </button>
         ))}
       </nav>
+      {onNext && (
+        <div className="mt-6 space-y-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Continuar</div>
+          <button
+            type="button"
+            disabled={nextDisabled}
+            onClick={onNext}
+            className={clsx(
+              'w-full rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition',
+              nextDisabled
+                ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                : 'bg-brand-600 hover:bg-brand-700 shadow-brand-200'
+            )}
+          >
+            {nextSectionLabel ? `Siguiente: ${nextSectionLabel}` : 'Siguiente'}
+          </button>
+          {nextDisabled && nextDisabledReason && (
+            <p className="text-xs text-red-500">{nextDisabledReason}</p>
+          )}
+        </div>
+      )}
     </aside>
     <div className="sticky top-16 z-20 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
       <div className="flex items-center justify-between pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
