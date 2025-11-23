@@ -20,9 +20,9 @@ const buildDefaultHorizonte = (): HorizonteDetalle => ({
 const defaultProfile: PerfilFinanciero = {
   usuario: {
     nombre: '',
-    edad: 0,
+    edad: 1,
     adultos: 1,
-    ninos: 0,
+    ninos: 1,
     tipo_vivienda: TipoVivienda.ARRENDADA // TODO: utilizar para personalizar insights de vivienda en próximas iteraciones
   },
   ingreso: {

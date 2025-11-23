@@ -23,6 +23,13 @@ export const IncomeSection = () => {
   const { perfil, setPerfil, updateIngreso } = useFinancialProfile();
   const { usuario, ingreso } = perfil;
 
+  const normalizePositiveInteger = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, '');
+    const withoutLeadingZeros = digitsOnly.replace(/^0+(?=\d)/, '');
+    const numeric = withoutLeadingZeros === '' ? 0 : parseInt(withoutLeadingZeros, 10);
+    return Math.max(1, numeric);
+  };
+
   const handleOtroChange = (id: string, updates: Partial<(typeof ingreso)['otros_ingresos'][number]>) => {
     const updated = ingreso.otros_ingresos.map((item) => (item.id === id ? { ...item, ...updates } : item));
     updateIngreso({ otros_ingresos: updated });
@@ -69,11 +76,13 @@ export const IncomeSection = () => {
               Edad
               <input
                 type="number"
-                min={0}
+                inputMode="numeric"
+                min={1}
+                step={1}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
                 value={usuario.edad}
                 onChange={(e) =>
-                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: Number(e.target.value) || 0 } }))
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: normalizePositiveInteger(e.target.value) } }))
                 }
               />
             </label>
@@ -81,11 +90,13 @@ export const IncomeSection = () => {
               Adultos en el hogar
               <input
                 type="number"
-                min={0}
+                inputMode="numeric"
+                min={1}
+                step={1}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
                 value={usuario.adultos}
                 onChange={(e) =>
-                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, adultos: Number(e.target.value) || 0 } }))
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, adultos: normalizePositiveInteger(e.target.value) } }))
                 }
               />
             </label>
@@ -93,11 +104,13 @@ export const IncomeSection = () => {
               Niños
               <input
                 type="number"
-                min={0}
+                inputMode="numeric"
+                min={1}
+                step={1}
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
                 value={usuario.ninos}
                 onChange={(e) =>
-                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: Number(e.target.value) || 0 } }))
+                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: normalizePositiveInteger(e.target.value) } }))
                 }
               />
             </label>

@@ -133,7 +133,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
       <div
         className="pointer-events-none absolute inset-0 opacity-90"
         style={{
@@ -144,7 +144,7 @@ export default function App() {
       ></div>
       <div className="relative z-10 flex min-h-screen flex-col bg-gradient-to-b from-white/95 via-white/90 to-white/95 bg-opacity-90">
         <Header />
-        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 lg:flex-row">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-3 py-4 sm:px-4 sm:py-6 lg:flex-row">
           <Sidebar
             sections={navSections}
             current={currentSection}
