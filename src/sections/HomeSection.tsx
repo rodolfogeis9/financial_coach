@@ -21,7 +21,7 @@ export const HomeSection = ({ onStart }: HomeProps) => (
       </p>
       <button
         onClick={onStart}
-        className="mt-4 inline-flex items-center justify-center rounded-2xl bg-brand-600 px-6 py-3 text-lg font-semibold text-white shadow-lg shadow-brand-200 transition hover:bg-brand-700"
+        className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-2xl bg-brand-600 px-5 py-3 text-base font-semibold text-white shadow-lg shadow-brand-200 transition hover:bg-brand-700 sm:px-6 sm:text-lg"
       >
         Comenzar diagnóstico
       </button>

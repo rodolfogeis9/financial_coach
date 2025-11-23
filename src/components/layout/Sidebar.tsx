@@ -37,7 +37,7 @@ export const Sidebar = ({
             disabled={section.disabled}
             onClick={() => onSelect(section.key)}
             className={clsx(
-              'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-semibold transition',
+              'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-semibold transition min-h-[44px]',
               section.key === current
                 ? 'bg-brand-50 text-brand-700'
                 : 'text-slate-600 hover:bg-slate-50',
@@ -85,7 +85,7 @@ export const Sidebar = ({
             disabled={section.disabled}
             onClick={() => onSelect(section.key)}
             className={clsx(
-              'flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-semibold transition',
+              'flex min-h-[40px] items-center gap-2 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-semibold transition sm:min-h-[44px]',
               section.key === current
                 ? 'border-brand-200 bg-brand-50 text-brand-700'
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',

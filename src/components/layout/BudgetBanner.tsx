@@ -30,13 +30,13 @@ export const BudgetBanner = ({ income, assigned }: BudgetBannerProps) => {
 
   return (
     <div className="rounded-3xl bg-gradient-to-r from-sky-500 via-sky-400 to-blue-700 p-[1px] shadow-2xl">
-      <div className="flex flex-col gap-6 rounded-[calc(1.5rem-1px)] bg-white/95 p-6 text-slate-900 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-5 rounded-[calc(1.5rem-1px)] bg-white/95 p-4 text-slate-900 sm:gap-6 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
           <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${badge}`}>
             Controla tu sueldo
           </span>
-          <h2 className={`text-2xl font-bold ${accent}`}>{title}</h2>
-          <p className="text-sm text-slate-600">{subtitle}</p>
+          <h2 className={`text-xl font-bold sm:text-2xl ${accent}`}>{title}</h2>
+          <p className="text-sm text-slate-600 sm:text-base">{subtitle}</p>
         </div>
         <div className="flex flex-1 flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-slate-600">
