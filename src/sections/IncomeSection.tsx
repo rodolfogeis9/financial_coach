@@ -23,6 +23,33 @@ export const IncomeSection = () => {
   const { perfil, setPerfil, updateIngreso } = useFinancialProfile();
   const { usuario, ingreso } = perfil;
 
+  const normalizePositiveIntegerInput = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, '');
+    return digitsOnly.replace(/^0+/, '');
+  };
+
+  const handleUsuarioCountChange = (field: 'edad' | 'ninos', rawValue: string) => {
+    const normalized = normalizePositiveIntegerInput(rawValue);
+    const numericValue = normalized === '' ? 0 : Number(normalized);
+
+    setPerfil((prev) => ({
+      ...prev,
+      usuario: { ...prev.usuario, [field]: numericValue }
+    }));
+  };
+
+  const enforceMinimumOnBlur = (field: 'edad' | 'ninos') => {
+    setPerfil((prev) => {
+      const current = prev.usuario[field];
+      if (current >= 1) return prev;
+
+      return {
+        ...prev,
+        usuario: { ...prev.usuario, [field]: 1 }
+      };
+    });
+  };
+
   const handleOtroChange = (id: string, updates: Partial<(typeof ingreso)['otros_ingresos'][number]>) => {
     const updated = ingreso.otros_ingresos.map((item) => (item.id === id ? { ...item, ...updates } : item));
     updateIngreso({ otros_ingresos: updated });
@@ -69,12 +96,13 @@ export const IncomeSection = () => {
               Edad
               <input
                 type="number"
-                min={0}
+                min={1}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.edad}
-                onChange={(e) =>
-                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, edad: Number(e.target.value) || 0 } }))
-                }
+                value={usuario.edad || ''}
+                onChange={(e) => handleUsuarioCountChange('edad', e.target.value)}
+                onBlur={() => enforceMinimumOnBlur('edad')}
               />
             </label>
             <label className="text-sm font-medium text-slate-700">
@@ -93,12 +121,13 @@ export const IncomeSection = () => {
               Niños
               <input
                 type="number"
-                min={0}
+                min={1}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                value={usuario.ninos}
-                onChange={(e) =>
-                  setPerfil((prev) => ({ ...prev, usuario: { ...prev.usuario, ninos: Number(e.target.value) || 0 } }))
-                }
+                value={usuario.ninos || ''}
+                onChange={(e) => handleUsuarioCountChange('ninos', e.target.value)}
+                onBlur={() => enforceMinimumOnBlur('ninos')}
               />
             </label>
             <label className="text-sm font-medium text-slate-700">

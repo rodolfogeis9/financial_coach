@@ -17,6 +17,9 @@ interface SidebarProps {
   nextSectionLabel?: string;
   nextDisabled?: boolean;
   nextDisabledReason?: string;
+  onPrevious?: () => void;
+  previousSectionLabel?: string;
+  previousDisabled?: boolean;
 }
 
 export const Sidebar = ({
@@ -26,7 +29,10 @@ export const Sidebar = ({
   onNext,
   nextSectionLabel,
   nextDisabled,
-  nextDisabledReason
+  nextDisabledReason,
+  onPrevious,
+  previousSectionLabel,
+  previousDisabled
 }: SidebarProps) => (
   <>
     <aside className="hidden w-full max-w-xs border-r border-slate-200 bg-white/80 px-4 py-6 backdrop-blur lg:block">
@@ -49,22 +55,39 @@ export const Sidebar = ({
           </button>
         ))}
       </nav>
-      {onNext && (
+      {(onNext || onPrevious) && (
         <div className="mt-6 space-y-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
           <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Continuar</div>
-          <button
-            type="button"
-            disabled={nextDisabled}
-            onClick={onNext}
-            className={clsx(
-              'w-full rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition',
-              nextDisabled
-                ? 'cursor-not-allowed bg-slate-200 text-slate-500'
-                : 'bg-brand-600 hover:bg-brand-700 shadow-brand-200'
+          <div className="flex flex-col gap-2">
+            {onPrevious && (
+              <button
+                type="button"
+                disabled={previousDisabled}
+                onClick={onPrevious}
+                className={clsx(
+                  'w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50',
+                  previousDisabled && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                {previousSectionLabel ? `Anterior: ${previousSectionLabel}` : 'Anterior'}
+              </button>
             )}
-          >
-            {nextSectionLabel ? `Siguiente: ${nextSectionLabel}` : 'Siguiente'}
-          </button>
+            {onNext && (
+              <button
+                type="button"
+                disabled={nextDisabled}
+                onClick={onNext}
+                className={clsx(
+                  'w-full rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition',
+                  nextDisabled
+                    ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                    : 'bg-brand-600 hover:bg-brand-700 shadow-brand-200'
+                )}
+              >
+                {nextSectionLabel ? `Siguiente: ${nextSectionLabel}` : 'Siguiente'}
+              </button>
+            )}
+          </div>
           {nextDisabled && nextDisabledReason && (
             <p className="text-xs text-red-500">{nextDisabledReason}</p>
           )}

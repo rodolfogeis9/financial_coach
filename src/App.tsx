@@ -98,6 +98,7 @@ export default function App() {
   const currentIndex = sectionsOrder.indexOf(currentSection);
   const previousSection = currentIndex > 0 ? sectionsOrder[currentIndex - 1] : null;
   const nextSection = currentIndex >= 0 && currentIndex < sectionsOrder.length - 1 ? sectionsOrder[currentIndex + 1] : null;
+  const previousDisabled = !previousSection || !canAccessSection(previousSection);
   const nextDisabled = !nextSection || !canAccessSection(nextSection);
 
   const handleSelectSection = (key: SeccionClave) => {
@@ -153,6 +154,9 @@ export default function App() {
             nextSectionLabel={nextSection ? sectionLabels[nextSection] : undefined}
             nextDisabled={nextDisabled}
             nextDisabledReason={nextDisabledReason}
+            onPrevious={previousSection ? () => handleSelectSection(previousSection) : undefined}
+            previousSectionLabel={previousSection ? sectionLabels[previousSection] : undefined}
+            previousDisabled={previousDisabled}
           />
           <main className="flex-1 space-y-6">
             {currentSection !== 'inicio' && (
